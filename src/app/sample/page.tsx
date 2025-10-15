@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import CreateSample from "./_components/create-sample";
 import DeleteSample from "./_components/delete-sample";
