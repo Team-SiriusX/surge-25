@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useGetJob, useGetApplications } from "../../_api"
+import { MessageApplicantButton } from "@/components/chat/message-applicant-button"
 
 interface ApplicantsViewProps {
   postId: string
@@ -159,6 +160,12 @@ export function ApplicantsView({ postId }: ApplicantsViewProps) {
                   </div>
 
                   <div className="flex items-center gap-3">
+                    <MessageApplicantButton
+                      applicantId={application.applicantId}
+                      jobPostId={postId}
+                      variant="outline"
+                      size="sm"
+                    />
                     <div className="text-right">
                       <div className="text-sm font-semibold text-polynesian_blue">
                         {application.matchScore || 0}%

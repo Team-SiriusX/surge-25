@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { handle } from "hono/vercel";
-import { finder, sample, seeker } from "./controllers";
+import { finder, sample, seeker, messages } from "./controllers";
 import { profile } from "./controllers/(profile)";
 import { ZodError } from "zod";
 
@@ -32,7 +32,8 @@ const routes = app
   .route("/sample", sample)
   .route("/finder", finder)
   .route("/seeker", seeker)
-  .route("/profile", profile);
+  .route("/profile", profile)
+  .route("/messages", messages);
 
 export const GET = handle(app);
 export const POST = handle(app);
