@@ -677,8 +677,7 @@ const app = new Hono()
         coverLetter: z
           .string()
           .min(50, "Cover letter must be at least 50 characters")
-          .max(2000, "Cover letter must not exceed 2000 characters")
-          .optional(),
+          .max(2000, "Cover letter must not exceed 2000 characters"),
         resumeUrl: z.string().url("Invalid resume URL").optional(),
         customMessage: z
           .string()
@@ -774,9 +773,9 @@ const app = new Hono()
           data: {
             jobPostId,
             applicantId: user.id,
-            coverLetter: applicationData.coverLetter || null,
-            resumeUrl: applicationData.resumeUrl || null,
-            customMessage: applicationData.customMessage || null,
+            coverLetter: applicationData.coverLetter ?? null,
+            resumeUrl: applicationData.resumeUrl ?? null,
+            customMessage: applicationData.customMessage ?? null,
             matchScore,
             status: "PENDING",
           },
