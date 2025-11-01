@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Loader2, X, Plus, Github, Linkedin, Globe, GraduationCap, Phone, Mail, FileText } from "lucide-react";
+import { Loader2, X, Plus, Github, Linkedin, Globe, GraduationCap, Phone, Mail, FileText, User, Calendar, Book, Target, Heart, Link as LinkIcon, CheckCircle2, Edit3, Save, TrendingUp, Award } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UploadButton } from "@/lib/uploadthing";
 
@@ -297,356 +297,433 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      {/* Profile Score Card */}
-      <Card className="mb-6 border-2 hover:border-primary/50 transition-all duration-300 overflow-hidden bg-gradient-to-br from-card to-card/50">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <span className="text-xl">📊</span>
-              </div>
-              <div>
-                <h3 className="text-base font-semibold">Profile Completeness</h3>
-                <p className="text-xs text-muted-foreground">
-                  {profile.profileScore === 100 
-                    ? "Perfect! Your profile is complete" 
-                    : `${Math.ceil((100 - profile.profileScore) / 7)} fields remaining`
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span 
-                className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient"
-                style={{
-                  backgroundSize: '200% 200%',
-                  animation: 'gradient 3s ease infinite',
-                }}
-              >
-                {profile.profileScore}
-              </span>
-              <span className="text-sm text-muted-foreground font-medium">%</span>
-            </div>
-          </div>
-          
-          <div className="relative mb-4">
-            {/* Background track */}
-            <div className="h-4 bg-muted rounded-full overflow-hidden">
-              {/* Animated progress fill */}
-              <div 
-                className="h-full bg-gradient-to-r from-primary via-secondary to-primary transition-all duration-1000 ease-out relative overflow-hidden"
-                style={{ 
-                  width: `${profile.profileScore}%`,
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 2s infinite linear',
-                }}
-              >
-                {/* Shine effect */}
-                <div 
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  style={{
-                    animation: 'shine 2s infinite linear',
-                  }}
-                />
-              </div>
-            </div>
-            {/* Percentage markers */}
-            <div className="absolute top-5 left-0 right-0 flex justify-between text-[10px] text-muted-foreground px-1">
-              <span>0%</span>
-              <span>25%</span>
-              <span>50%</span>
-              <span>75%</span>
-              <span>100%</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-muted/20 via-background to-background">
+      {/* Minimal Header Banner */}
+      <div className="relative h-32 bg-gradient-to-r from-primary/5 via-primary/3 to-secondary/5 border-b border-border/50">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px]" />
+      </div>
 
-          {/* Field breakdown */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
-            {getFieldScores().map((field, index) => (
+      <div className="container mx-auto px-6 pb-16 max-w-7xl">
+        {/* Profile Header */}
+        <div className="-mt-20 mb-8">
+          <Card className="border-border/50 bg-card backdrop-blur-sm shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Avatar */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Avatar className="relative w-32 h-32 border-2 border-border shadow-xl rounded-2xl">
+                    <AvatarImage src={imagePreview || ""} alt={profile.name} className="object-cover" />
+                    <AvatarFallback className="text-4xl font-semibold bg-gradient-to-br from-primary to-secondary text-white rounded-2xl">
+                      {profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {imagePreview && (
+                    <button
+                      onClick={handleRemoveAvatar}
+                      className="absolute -top-2 -right-2 w-8 h-8 bg-background border-2 border-border rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-destructive hover:border-destructive hover:text-white transition-all duration-300"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  {profile.emailVerified && (
+                    <div className="absolute -bottom-1 -right-1 w-9 h-9 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center border-3 border-card shadow-lg">
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-2 truncate">
+                        {profile.name}
+                      </h1>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Mail className="w-4 h-4" />
+                          {profile.email}
+                        </span>
+                        {profile.emailVerified && (
+                          <Badge variant="secondary" className="gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Verified
+                          </Badge>
+                        )}
+                        {profile.role && (
+                          <Badge variant="outline" className="capitalize">
+                            {profile.role}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {!isEditing ? (
+                        <Button
+                          onClick={() => setIsEditing(true)}
+                          variant="default"
+                          className="gap-2"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            onClick={handleSaveProfile}
+                            disabled={saving}
+                            className="gap-2"
+                          >
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsEditing(false);
+                              fetchProfile();
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {profile.bio && (
+                    <p className="text-muted-foreground leading-relaxed mb-4 max-w-3xl">
+                      {profile.bio}
+                    </p>
+                  )}
+
+                  {/* Meta Info */}
+                  <div className="flex flex-wrap gap-2">
+                    {profile.university && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 text-sm">
+                        <GraduationCap className="w-4 h-4 text-primary" />
+                        <span>{profile.university}</span>
+                      </div>
+                    )}
+                    {profile.major && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 text-sm">
+                        <Book className="w-4 h-4 text-primary" />
+                        <span>{profile.major}</span>
+                      </div>
+                    )}
+                    {profile.graduationYear && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 text-sm">
+                        <Calendar className="w-4 h-4 text-primary" />
+                        <span>{profile.graduationYear}</span>
+                      </div>
+                    )}
+                    {profile.phone && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 text-sm">
+                        <Phone className="w-4 h-4 text-primary" />
+                        <span>{profile.phone}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Social Links */}
+                  {(profile.linkedIn || profile.github || profile.portfolio) && (
+                    <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
+                      {profile.linkedIn && (
+                        <a
+                          href={profile.linkedIn}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 rounded-lg bg-[#0077B5]/10 hover:bg-[#0077B5] text-[#0077B5] hover:text-white flex items-center justify-center transition-all"
+                        >
+                          <Linkedin className="w-4 h-4" />
+                        </a>
+                      )}
+                      {profile.github && (
+                        <a
+                          href={profile.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 rounded-lg bg-foreground/10 hover:bg-foreground text-foreground hover:text-background flex items-center justify-center transition-all"
+                        >
+                          <Github className="w-4 h-4" />
+                        </a>
+                      )}
+                      {profile.portfolio && (
+                        <a
+                          href={profile.portfolio}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground flex items-center justify-center transition-all"
+                        >
+                          <Globe className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Section */}
+                <div className="flex flex-col gap-3 items-center">
+                  <UploadButton
+                    endpoint="avatarUploader"
+                    onClientUploadComplete={(res) => {
+                      if (res?.[0]?.url) {
+                        handleAvatarUploadComplete(res[0].url);
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      toast.error(`Upload failed: ${error.message}`);
+                    }}
+                    appearance={{
+                      button: "ut-ready:bg-primary/10 ut-uploading:cursor-not-allowed bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 text-xs rounded-lg border border-primary/20 font-medium transition-all",
+                      allowedContent: "hidden",
+                    }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Profile Score */}
+        <Card className="mb-8 border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Profile Strength</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.profileScore === 100 
+                      ? "Complete profile" 
+                      : `${Math.ceil((100 - profile.profileScore) / 7)} ${Math.ceil((100 - profile.profileScore) / 7) === 1 ? 'field' : 'fields'} remaining`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-4xl font-bold text-foreground">{profile.profileScore}</div>
+                <div className="text-xs text-muted-foreground font-medium">out of 100</div>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="relative h-2 bg-muted rounded-full overflow-hidden mb-6">
               <div
-                key={field.name}
-                className={`group relative flex flex-col p-2.5 rounded-lg text-xs transition-all duration-300 hover:scale-105 ${
-                  field.filled
-                    ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/20 border border-green-200 dark:border-green-800"
-                    : "bg-gradient-to-br from-muted/30 to-muted/60 border border-border hover:border-primary/30 hover:from-primary/5 hover:to-primary/10"
-                }`}
-                style={{
-                  animationDelay: `${index * 50}ms`,
-                }}
-              >
-                <div className="flex items-center justify-between gap-1.5">
-                  <span className={`font-medium truncate text-[11px] ${
-                    field.filled ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
-                  }`}>
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-secondary transition-all duration-1000"
+                style={{ width: `${profile.profileScore}%` }}
+              />
+            </div>
+
+            {/* Fields Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+              {getFieldScores().map((field) => (
+                <div
+                  key={field.name}
+                  className={`flex items-center justify-between p-2.5 rounded-lg text-xs transition-all ${
+                    field.filled
+                      ? "bg-emerald-500/10 border border-emerald-500/20"
+                      : "bg-muted/30 border border-border/50"
+                  }`}
+                >
+                  <span className={`font-medium ${field.filled ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
                     {field.name}
                   </span>
-                  <div className={`flex items-center justify-center min-w-[32px] h-6 rounded-md text-[10px] font-bold transition-all ${
-                    field.filled 
-                      ? "bg-green-500 text-white shadow-sm" 
-                      : "bg-muted text-muted-foreground/60 group-hover:bg-primary/10 group-hover:text-primary"
+                  <div className={`flex items-center justify-center w-7 h-7 rounded-md text-xs font-semibold ${
+                    field.filled ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground/60"
                   }`}>
-                    {field.filled ? `✓ ${field.points}` : field.points}
+                    {field.filled ? <CheckCircle2 className="w-4 h-4" /> : field.points}
                   </div>
                 </div>
-                {field.filled && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/10 to-green-400/0 animate-pulse rounded-lg pointer-events-none" />
-                )}
+              ))}
+            </div>
+
+            {profile.profileScore !== 100 && (
+              <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/10">
+                <p className="text-sm text-center">
+                  Complete your profile to increase visibility by <strong>{100 - profile.profileScore}%</strong>
+                </p>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/10">
-            <p className="text-xs text-center font-medium">
-              {profile.profileScore === 100 
-                ? "🎉 Amazing! Your profile stands out to recruiters and collaborators" 
-                : `💡 Complete your profile to increase visibility by ${100 - profile.profileScore}%`
-              }
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <style jsx>{`
-        @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes shine {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
-
-      {/* Avatar and Basic Info */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">📸</span>
-            </div>
-            <div>
-              <CardTitle className="text-base">Profile Picture</CardTitle>
-              <CardDescription className="text-xs">Upload your profile picture (Max 4MB)</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <Avatar className="w-28 h-28 border-4 border-muted ring-2 ring-primary/10 transition-all duration-300 group-hover:ring-primary/30">
-                <AvatarImage src={imagePreview || ""} alt={profile.name} className="object-cover" />
-                <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary via-secondary to-primary text-white">
-                  {profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
-              {imagePreview && (
-                <button
-                  onClick={handleRemoveAvatar}
-                  className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-br from-destructive to-destructive/80 text-white rounded-full flex items-center justify-center hover:scale-110 hover:rotate-90 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  title="Remove photo"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center border-2 border-card shadow-md">
-                <span className="text-white text-xs">✓</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <UploadButton
-                endpoint="avatarUploader"
-                onClientUploadComplete={(res) => {
-                  if (res?.[0]?.url) {
-                    handleAvatarUploadComplete(res[0].url);
-                  }
-                }}
-                onUploadError={(error: Error) => {
-                  toast.error(`Upload failed: ${error.message}`);
-                }}
-                appearance={{
-                  button: "ut-ready:bg-primary ut-uploading:cursor-not-allowed ut-uploading:bg-primary/50 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm rounded-md",
-                  allowedContent: "text-xs text-muted-foreground",
-                }}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Personal Information */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="flex flex-row items-center justify-between border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">👤</span>
-            </div>
-            <div>
-              <CardTitle className="text-base">Personal Information</CardTitle>
-              <CardDescription className="text-xs">Update your personal details</CardDescription>
-            </div>
-          </div>
-          {!isEditing ? (
-            <Button 
-              onClick={() => setIsEditing(true)}
-              className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
-            >
-              ✏️ Edit
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsEditing(false);
-                  fetchProfile();
-                }}
-                className="hover:bg-muted"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveProfile} 
-                disabled={saving}
-                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "💾 Save"}
-              </Button>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                {isEditing ? (
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                ) : (
-                  <span>{profile.name}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{profile.email}</span>
-                {profile.emailVerified && (
-                  <Badge variant="secondary" className="text-xs">Verified</Badge>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                {isEditing ? (
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+1234567890"
-                  />
-                ) : (
-                  <span>{profile.phone || "Not provided"}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="university">University</Label>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                {isEditing ? (
-                  <Input
-                    id="university"
-                    value={formData.university}
-                    onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                    placeholder="University name"
-                  />
-                ) : (
-                  <span>{profile.university || "Not provided"}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="major">Major</Label>
-              {isEditing ? (
-                <Input
-                  id="major"
-                  value={formData.major}
-                  onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                  placeholder="Computer Science"
-                />
-              ) : (
-                <span>{profile.major || "Not provided"}</span>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="graduationYear">Graduation Year</Label>
-              {isEditing ? (
-                <Input
-                  id="graduationYear"
-                  type="number"
-                  value={formData.graduationYear || ""}
-                  onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value ? parseInt(e.target.value) : null })}
-                  placeholder="2025"
-                  min="2020"
-                  max="2050"
-                />
-              ) : (
-                <span>{profile.graduationYear || "Not provided"}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            {isEditing ? (
-              <Textarea
-                id="bio"
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
-                rows={4}
-                maxLength={500}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">{profile.bio || "No bio provided"}</p>
             )}
-            {isEditing && (
-              <p className="text-xs text-muted-foreground text-right">
-                {formData.bio.length}/500 characters
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <style jsx>{`
+          @keyframes gradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+          }
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
+
+        {/* Personal Information */}
+        <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Personal Information</CardTitle>
+                <CardDescription className="text-sm">Manage your personal details</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  {isEditing ? (
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span className="text-sm">{profile.name}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{profile.email}</span>
+                  {profile.emailVerified && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm font-medium">Phone</Label>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  {isEditing ? (
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+1234567890"
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span className="text-sm">{profile.phone || "Not provided"}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="university" className="text-sm font-medium">University</Label>
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                  {isEditing ? (
+                    <Input
+                      id="university"
+                      value={formData.university}
+                      onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                      placeholder="University name"
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span className="text-sm">{profile.university || "Not provided"}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="major" className="text-sm font-medium">Major</Label>
+                <div className="flex items-center gap-2">
+                  <Book className="w-4 h-4 text-muted-foreground" />
+                  {isEditing ? (
+                    <Input
+                      id="major"
+                      value={formData.major}
+                      onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+                      placeholder="Computer Science"
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span className="text-sm">{profile.major || "Not provided"}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="graduationYear" className="text-sm font-medium">Graduation Year</Label>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  {isEditing ? (
+                    <Input
+                      id="graduationYear"
+                      type="number"
+                      value={formData.graduationYear || ""}
+                      onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value ? parseInt(e.target.value) : null })}
+                      placeholder="2025"
+                      min="2020"
+                      max="2050"
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span className="text-sm">{profile.graduationYear || "Not provided"}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="bio" className="text-sm font-medium">Bio</Label>
+                {isEditing ? (
+                  <>
+                    <Textarea
+                      id="bio"
+                      value={formData.bio}
+                      onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                      placeholder="Tell us about yourself..."
+                      rows={4}
+                      maxLength={500}
+                      className="resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {formData.bio.length}/500 characters
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{profile.bio || "No bio provided"}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
       {/* Skills */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">🎯</span>
+      <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <Target className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base">Skills</CardTitle>
-              <CardDescription className="text-xs">Add your technical and soft skills</CardDescription>
+              <CardTitle className="text-lg">Skills</CardTitle>
+              <CardDescription className="text-sm">Add your technical and soft skills</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -688,15 +765,15 @@ export default function ProfilePage() {
       </Card>
 
       {/* Interests */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">❤️</span>
+      <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base">Interests</CardTitle>
-              <CardDescription className="text-xs">Share your interests and hobbies</CardDescription>
+              <CardTitle className="text-lg">Interests</CardTitle>
+              <CardDescription className="text-sm">Share your interests and hobbies</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -737,16 +814,16 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Social Links */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">📄</span>
+      {/* Resume */}
+      <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base">Resume</CardTitle>
-              <CardDescription className="text-xs">Upload your resume (PDF, Max 8MB)</CardDescription>
+              <CardTitle className="text-lg">Resume</CardTitle>
+              <CardDescription className="text-sm">Upload your resume (PDF, Max 8MB)</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -785,15 +862,15 @@ export default function ProfilePage() {
       </Card>
 
       {/* Social Links */}
-      <Card className="mb-6 border hover:border-primary/30 transition-all duration-300">
-        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span className="text-sm">🔗</span>
+      <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <LinkIcon className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base">Social Links</CardTitle>
-              <CardDescription className="text-xs">Connect your social profiles</CardDescription>
+              <CardTitle className="text-lg">Social Links</CardTitle>
+              <CardDescription className="text-sm">Connect your social profiles</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -874,6 +951,7 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
