@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Mail, Phone, MapPin, MessageSquare, CheckCircle, XCircle } from "lucide-react"
+import { ArrowLeft, Mail, Phone, MapPin, MessageSquare, CheckCircle, XCircle, FileText, ExternalLink } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -112,26 +112,26 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-polynesian_blue" />
+                <Mail className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
                   <a
                     href={`mailto:${applicant?.email || ""}`}
-                    className="text-polynesian_blue hover:underline"
+                    className="text-primary hover:underline"
                   >
                     {applicant?.email || "N/A"}
                   </a>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-polynesian_blue" />
+                <Phone className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Phone</p>
                   <p className="font-medium">N/A</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-polynesian_blue" />
+                <MapPin className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">University</p>
                   <p className="font-medium">{applicant?.university || "N/A"}</p>
@@ -160,16 +160,37 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {applicant.skills.map((skill) => (
+                  {applicant.skills?.map((skill: string) => (
                     <Badge
                       key={skill}
                       variant="outline"
-                      className="bg-polynesian_blue/5 text-polynesian_blue border-polynesian_blue/20"
+                      className="bg-primary/5 text-primary border-primary/20"
                     >
                       {skill}
                     </Badge>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Resume */}
+          {application.resumeUrl && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Resume</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <a
+                  href={application.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  <FileText className="w-5 h-5" />
+                  View Resume
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </CardContent>
             </Card>
           )}
@@ -186,6 +207,18 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
             </Card>
           )}
 
+          {/* Custom Message */}
+          {application.customMessage && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Additional Message</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground whitespace-pre-wrap">{application.customMessage}</p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Portfolio */}
           {applicant?.portfolio && (
             <Card>
@@ -197,7 +230,7 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
                   href={applicant.portfolio}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-polynesian_blue hover:underline"
+                  className="text-primary hover:underline"
                 >
                   {applicant.portfolio}
                 </a>
@@ -213,11 +246,11 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-2">Match Score</p>
               <div className="flex items-end gap-2">
-                <div className="text-4xl font-bold text-polynesian_blue">{application.matchScore || 0}%</div>
+                <div className="text-4xl font-bold text-primary">{application.matchScore || 0}%</div>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
                 <div
-                  className="bg-polynesian_blue h-2 rounded-full"
+                  className="bg-primary h-2 rounded-full"
                   style={{ width: `${application.matchScore || 0}%` }}
                 />
               </div>
@@ -254,7 +287,7 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
               <CardTitle className="text-base">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full bg-polynesian_blue hover:bg-polynesian_blue/90 gap-2">
+              <Button className="w-full bg-primary hover:bg-primary/90 gap-2">
                 <MessageSquare className="w-4 h-4" />
                 Send Message
               </Button>

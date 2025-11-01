@@ -125,8 +125,8 @@ export function ApplicantsView({ postId }: ApplicantsViewProps) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-polynesian_blue/10 rounded-full flex items-center justify-center">
-                        <span className="font-semibold text-polynesian_blue">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="font-semibold text-primary">
                           {application.applicant?.name?.charAt(0) || "?"}
                         </span>
                       </div>
@@ -158,9 +158,9 @@ export function ApplicantsView({ postId }: ApplicantsViewProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-polynesian_blue">
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                      <div className="text-sm font-semibold text-primary">
                         {application.matchScore || 0}%
                       </div>
                       <p className="text-xs text-muted-foreground">Match</p>

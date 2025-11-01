@@ -174,14 +174,14 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-4 h-4 text-polynesian_blue" />
+                  <Eye className="w-4 h-4 text-primary" />
                   <span className="text-sm text-muted-foreground">Views</span>
                 </div>
                 <p className="text-2xl font-bold">{post.views || 0}</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-polynesian_blue" />
+                  <Users className="w-4 h-4 text-primary" />
                   <span className="text-sm text-muted-foreground">Applications</span>
                 </div>
                 <p className="text-2xl font-bold">{applicants.length}</p>

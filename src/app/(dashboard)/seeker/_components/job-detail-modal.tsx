@@ -43,7 +43,7 @@ export function JobDetailModal({ job, isOpen, onClose, isSaved = false, onSave, 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto md:max-w-2xl">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6">
         {showApplyForm ? (
           <ApplyForm jobTitle={job.title} jobId={job.id} onCancel={() => setShowApplyForm(false)} onSuccess={onClose} />
         ) : (

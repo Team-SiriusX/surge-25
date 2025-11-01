@@ -143,7 +143,7 @@ export default function BrowsePage() {
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border py-12">
               <p className="text-lg font-semibold text-foreground">No jobs match your filters</p>
               <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
-              <button onClick={handleReset} className="mt-4 text-polynesian_blue hover:underline">
+              <button onClick={handleReset} className="mt-4 text-primary hover:underline">
                 Reset filters
               </button>
             </div>

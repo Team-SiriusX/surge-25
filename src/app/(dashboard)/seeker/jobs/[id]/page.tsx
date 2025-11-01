@@ -145,7 +145,7 @@ export default function JobDetailPage({ params }: PageProps) {
                 </div>
                 <button onClick={handleSave} className="transition-transform hover:scale-110">
                   {job.hasSaved ? (
-                    <BookmarkCheck size={28} className="text-polynesian_blue" />
+                    <BookmarkCheck size={28} className="text-primary" />
                   ) : (
                     <BookmarkPlus size={28} className="text-muted-foreground" />
                   )}
@@ -209,9 +209,9 @@ export default function JobDetailPage({ params }: PageProps) {
               <div className="mb-8">
                 <h2 className="mb-3 text-2xl font-semibold">Requirements</h2>
                 <ul className="space-y-2">
-                  {job.requirements.map((req, idx) => (
-                    <li key={idx} className="flex gap-3 text-muted-foreground">
-                      <span className="font-semibold text-polynesian_blue">•</span>
+                  {job.requirements.map((req: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="font-semibold text-primary">•</span>
                       <span>{req}</span>
                     </li>
                   ))}

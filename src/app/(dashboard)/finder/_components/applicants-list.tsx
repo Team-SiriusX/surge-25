@@ -53,8 +53,8 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-polynesian_blue/10 rounded-full flex items-center justify-center">
-                    <span className="font-semibold text-polynesian_blue">{applicant.name.charAt(0)}</span>
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="font-semibold text-primary">{applicant.name.charAt(0)}</span>
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{applicant.name}</h3>
@@ -84,7 +84,7 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
 
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <div className="text-sm font-semibold text-polynesian_blue">{applicant.matchScore}%</div>
+                  <div className="text-sm font-semibold text-primary">{applicant.matchScore}%</div>
                   <p className="text-xs text-muted-foreground">Match</p>
                 </div>
                 <Badge className={getStatusColor(applicant.status)}>
