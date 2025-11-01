@@ -6,19 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useCreateConversation } from "@/hooks/use-create-conversation";
 import { toast } from "sonner";
 
-type MessageApplicantButtonProps = {
-  applicantId: string;
+type MessagePosterButtonProps = {
+  posterId: string;
   jobPostId: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
 };
 
-export function MessageApplicantButton({
-  applicantId,
+export function MessagePosterButton({
+  posterId,
   jobPostId,
   variant = "outline",
   size = "default",
-}: MessageApplicantButtonProps) {
+  className,
+}: MessagePosterButtonProps) {
   const router = useRouter();
   const createConversation = useCreateConversation();
 
@@ -27,7 +29,7 @@ export function MessageApplicantButton({
 
     try {
       const result = await createConversation.mutateAsync({
-        receiverId: applicantId,
+        receiverId: posterId,
         jobPostId,
       });
 
@@ -45,9 +47,10 @@ export function MessageApplicantButton({
       size={size}
       onClick={handleMessage}
       disabled={createConversation.isPending}
+      className={className}
     >
       <MessageSquare className="w-4 h-4 mr-2" />
-      Message
+      Message Poster
     </Button>
   );
 }

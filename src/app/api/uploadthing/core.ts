@@ -80,6 +80,44 @@ export const ourFileRouter = {
         url: file.url,
       };
     }),
+
+  // Message attachment uploader
+  messageAttachment: f({
+    image: {
+      maxFileSize: "8MB",
+      maxFileCount: 1,
+    },
+    pdf: {
+      maxFileSize: "16MB",
+      maxFileCount: 1,
+    },
+    video: {
+      maxFileSize: "32MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async ({ req }) => {
+      const session = await auth.api.getSession({ headers: req.headers });
+
+      if (!session?.user) {
+        throw new UploadThingError("Unauthorized - Please sign in to upload");
+      }
+
+      return { userId: session.user.id, userName: session.user.name };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("✅ Message attachment upload complete for user:", metadata.userId);
+      console.log("📎 File:", file.name, "Size:", file.size, "Type:", file.type);
+      console.log("🔗 File URL:", file.url);
+
+      return {
+        uploadedBy: metadata.userId,
+        url: file.url,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

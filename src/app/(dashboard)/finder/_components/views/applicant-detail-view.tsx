@@ -43,7 +43,8 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
         jobPostId: postId,
       })
 
-      router.push(`/finder/messages?conversation=${result.conversation.id}`)
+      // TODO: Update this to /messages route once implemented
+      router.push(`/messages?conversation=${result.conversation.id}`)
     } catch (error: any) {
       toast.error(error.message || "Failed to start conversation")
     }

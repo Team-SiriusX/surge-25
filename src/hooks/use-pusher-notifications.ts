@@ -25,7 +25,8 @@ export function usePusherNotifications(userId: string | null) {
 
     const channel = pusherClient.subscribe(`user-${userId}`);
 
-    channel.bind("new-message", () => {
+    channel.bind("new-message-notification", (data: any) => {
+      console.log("New message notification received:", data);
       // Invalidate conversations list to show new conversation/message
       queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.list(),

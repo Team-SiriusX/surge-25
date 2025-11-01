@@ -1,10 +1,9 @@
-import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
-import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
-import { ApplicationStatus } from "@/types/models";
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { z } from "zod";
 
 const conversationListInclude = {
   participants: {
@@ -122,7 +121,7 @@ const getConversationApplication = async (
   // If current user is the poster, get application for the other participant
   // If current user is not the poster, get their own application
   let applicantId: string;
-  
+
   if (jobPost.poster?.id === currentUserId) {
     // Current user is the poster, find the applicant
     const applicantParticipant = conversation.participants?.find(
@@ -346,7 +345,10 @@ const app = new Hono()
       const { receiverId, jobPostId } = c.req.valid("json");
 
       if (receiverId === session.user.id) {
-        return c.json({ error: "Cannot create a conversation with yourself" }, 400);
+        return c.json(
+          { error: "Cannot create a conversation with yourself" },
+          400
+        );
       }
 
       // Check if conversation already exists
@@ -412,6 +414,10 @@ const app = new Hono()
       "json",
       z.object({
         content: z.string().min(1),
+        attachmentUrl: z.string().optional(),
+        attachmentName: z.string().optional(),
+        attachmentType: z.string().optional(),
+        attachmentSize: z.number().optional(),
       })
     ),
     async (c) => {
@@ -426,11 +432,8 @@ const app = new Hono()
           return c.json({ error: "Unauthorized" }, 401);
         }
 
-        const conversationId = c.req.param("conversationId");
-        const { content } = c.req.valid("json");
-
-        console.log("Send message - ConversationId:", conversationId);
-        console.log("Send message - Content length:", content.length);
+      const conversationId = c.req.param("conversationId");
+      const { content, attachmentUrl, attachmentName, attachmentType, attachmentSize } = c.req.valid("json");
 
         // Get conversation and verify user is a participant
         const conversation = await db.conversation.findUnique({
@@ -471,36 +474,37 @@ const app = new Hono()
           return c.json({ error: "Receiver not found" }, 404);
         }
 
-        // Create message
-        console.log("Send message - Creating message...");
-        const message = await db.message.create({
-          data: {
-            content,
-            conversationId,
-            senderId: session.user.id,
-            receiverId,
-          },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                email: true,
-              },
-            },
-            receiver: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                email: true,
-              },
+      // Create message
+      const message = await db.message.create({
+        data: {
+          content,
+          conversationId,
+          senderId: session.user.id,
+          receiverId,
+          attachmentUrl: attachmentUrl ?? null,
+          attachmentName: attachmentName ?? null,
+          attachmentType: attachmentType ?? null,
+          attachmentSize: attachmentSize ?? null,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              email: true,
             },
           },
-        });
-
-        console.log("Send message - Message created:", message.id);
+          receiver: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              email: true,
+            },
+          },
+        },
+      });
 
         // Update conversation timestamp
         await db.conversation.update({
@@ -596,3 +600,4 @@ const app = new Hono()
   });
 
 export { app as messages };
+

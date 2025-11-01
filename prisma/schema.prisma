@@ -230,6 +230,12 @@ model Message {
   senderId       String
   receiverId     String
 
+  // File attachments
+  attachmentUrl  String? // URL to uploaded file
+  attachmentName String? // Original filename
+  attachmentType String? // MIME type (image/png, application/pdf, etc.)
+  attachmentSize Int? // File size in bytes
+
   // Relations
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
@@ -275,7 +281,7 @@ enum JobType {
   PART_TIME_JOB
   COMPETITION_HACKATHON
   INTERNSHIP
-  FREELANCE
+FREELANCE
 }
 
 enum JobCategory {
