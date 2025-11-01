@@ -3,6 +3,9 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 import Header from "@/components/layout/header";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -26,6 +29,7 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} font-sans antialiased`}
         style={{ fontFamily: 'var(--font-space-grotesk)' }}
       >
+        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <Providers>{children}</Providers>
       </body>
     </html>
