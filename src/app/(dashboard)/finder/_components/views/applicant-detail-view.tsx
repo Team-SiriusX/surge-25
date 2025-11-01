@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useGetApplication, useUpdateApplicationStatus } from "../../_api"
+import { useCreateConversation } from "@/hooks/use-create-conversation"
+import { toast } from "sonner"
 
 interface ApplicantDetailViewProps {
   postId: string
@@ -16,6 +18,7 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
   const router = useRouter()
   const { data, isLoading } = useGetApplication(applicantId)
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateApplicationStatus(applicantId)
+  const createConversation = useCreateConversation()
 
   const application = data?.data
 
@@ -29,6 +32,21 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
 
   const handleAccept = () => {
     updateStatus({ status: "ACCEPTED" })
+  }
+
+  const handleSendMessage = async () => {
+    if (!application) return
+
+    try {
+      const result = await createConversation.mutateAsync({
+        receiverId: application.applicant.id,
+        jobPostId: postId,
+      })
+
+      router.push(`/finder/messages?conversation=${result.conversation.id}`)
+    } catch (error: any) {
+      toast.error(error.message || "Failed to start conversation")
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -287,9 +305,13 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
               <CardTitle className="text-base">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full bg-primary hover:bg-primary/90 gap-2">
+              <Button 
+                className="w-full bg-primary hover:bg-primary/90 gap-2"
+                onClick={handleSendMessage}
+                disabled={createConversation.isPending}
+              >
                 <MessageSquare className="w-4 h-4" />
-                Send Message
+                {createConversation.isPending ? "Starting..." : "Send Message"}
               </Button>
               <Button
                 variant="outline"

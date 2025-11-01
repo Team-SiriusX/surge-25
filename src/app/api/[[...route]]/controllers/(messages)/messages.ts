@@ -36,10 +36,35 @@ const conversationListInclude = {
 } as const;
 
 const conversationDetailInclude = {
-  ...conversationListInclude,
+  participants: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          email: true,
+        },
+      },
+    },
+  },
+  jobPost: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      poster: {
+        select: {
+          id: true,
+          name: true,
+          university: true,
+        },
+      },
+    },
+  },
   messages: {
     orderBy: {
-      createdAt: "asc",
+      createdAt: "asc" as const,
     },
     include: {
       sender: {
@@ -89,16 +114,31 @@ const getConversationApplication = async (
 ) => {
   if (!conversation.jobPostId) return null;
 
-  const otherParticipant = conversation.participants?.find(
-    (participant: any) => participant.userId !== currentUserId
-  );
+  // Find the applicant (not the job poster)
+  // The job poster owns the job post, so find the other participant
+  const jobPost = conversation.jobPost;
+  if (!jobPost) return null;
 
-  if (!otherParticipant) return null;
+  // If current user is the poster, get application for the other participant
+  // If current user is not the poster, get their own application
+  let applicantId: string;
+  
+  if (jobPost.poster?.id === currentUserId) {
+    // Current user is the poster, find the applicant
+    const applicantParticipant = conversation.participants?.find(
+      (participant: any) => participant.userId !== currentUserId
+    );
+    if (!applicantParticipant) return null;
+    applicantId = applicantParticipant.userId;
+  } else {
+    // Current user is the applicant
+    applicantId = currentUserId;
+  }
 
   return db.application.findFirst({
     where: {
       jobPostId: conversation.jobPostId,
-      applicantId: otherParticipant.userId,
+      applicantId: applicantId,
     },
     select: {
       id: true,
@@ -213,14 +253,7 @@ const app = new Hono()
       )
     );
 
-    // Filter to only show conversations with shortlisted applicants
-    const filteredConversations = conversations.filter((conversation) => {
-      if (!conversation.jobPostId) return true; // Non-job conversations are always visible
-      const status = conversation.application?.status;
-      return status === ApplicationStatus.SHORTLISTED; // Only show shortlisted
-    });
-
-    return c.json({ conversations: filteredConversations });
+    return c.json({ conversations });
   })
 
   // Get a specific conversation with all messages
@@ -251,18 +284,6 @@ const app = new Hono()
 
     if (!isParticipant) {
       return c.json({ error: "Not authorized to view this conversation" }, 403);
-    }
-
-    // Verify this is a shortlisted conversation if it's job-related
-    if (baseConversation.jobPostId) {
-      const application = await getConversationApplication(
-        baseConversation,
-        session.user.id
-      );
-
-      if (application?.status !== ApplicationStatus.SHORTLISTED) {
-        return c.json({ error: "Conversation not available" }, 403);
-      }
     }
 
     // Mark messages as read
@@ -326,30 +347,6 @@ const app = new Hono()
 
       if (receiverId === session.user.id) {
         return c.json({ error: "Cannot create a conversation with yourself" }, 400);
-      }
-
-      // Verify shortlisted status for job-related conversations
-      if (jobPostId) {
-        const shortlistedApplication = await db.application.findFirst({
-          where: {
-            jobPostId,
-            applicantId: receiverId,
-            status: ApplicationStatus.SHORTLISTED,
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        if (!shortlistedApplication) {
-          return c.json(
-            {
-              error:
-                "You can only start conversations with shortlisted applicants for this job.",
-            },
-            403
-          );
-        }
       }
 
       // Check if conversation already exists
@@ -445,24 +442,6 @@ const app = new Hono()
 
       if (!isParticipant) {
         return c.json({ error: "Not authorized to send messages" }, 403);
-      }
-
-      // Verify shortlisted status for job-related conversations
-      if (conversation.jobPostId) {
-        const application = await getConversationApplication(
-          conversation,
-          session.user.id
-        );
-
-        if (application?.status !== ApplicationStatus.SHORTLISTED) {
-          return c.json(
-            {
-              error:
-                "You can only message shortlisted applicants for this job.",
-            },
-            403
-          );
-        }
       }
 
       // Get receiver ID (the other participant)
