@@ -3,6 +3,7 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { GlobeSection } from "@/components/sections/globe-section";
 import { FeaturesSection } from "@/components/sections/features-section";
 import { GeminiSection } from "@/components/sections/gemini-section";
+import { TestimonialsSection } from "@/components/sections/testimonials-section";
 
 export default function Home() {
   return (
@@ -46,6 +47,9 @@ export default function Home() {
 
       {/* Gemini Effect Section */}
       <GeminiSection />
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
     </>
   );
 }
