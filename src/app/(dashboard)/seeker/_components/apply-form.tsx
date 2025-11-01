@@ -6,21 +6,26 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Upload, FileText, X } from "lucide-react"
+import { useCreateApplication } from "../_api"
+import { UploadButton } from "@/lib/uploadthing"
+import { toast } from "sonner"
 
 const applyFormSchema = z.object({
-  fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().min(10, { message: "Please enter a valid phone number." }),
   coverLetter: z
     .string()
     .min(50, { message: "Cover letter must be at least 50 characters." })
-    .max(2000, { message: "Cover letter must not exceed 2000 characters." }),
-  linkedinUrl: z.string().url("Invalid LinkedIn URL").optional().or(z.literal("")),
-  portfolio: z.string().url("Invalid portfolio URL").optional().or(z.literal("")),
+    .max(2000, { message: "Cover letter must not exceed 2000 characters." })
+    .optional()
+    .or(z.literal("")),
+  resumeUrl: z.string().url("Invalid resume URL").optional().or(z.literal("")),
+  customMessage: z
+    .string()
+    .max(1000, { message: "Custom message must not exceed 1000 characters." })
+    .optional()
+    .or(z.literal("")),
 })
 
 type ApplyFormValues = z.infer<typeof applyFormSchema>
@@ -34,36 +39,38 @@ interface ApplyFormProps {
 
 export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormProps) {
   const [submitted, setSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null)
+  const { mutate: createApplication, isPending } = useCreateApplication(jobId)
 
   const form = useForm<ApplyFormValues>({
     resolver: zodResolver(applyFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
       coverLetter: "",
-      linkedinUrl: "",
-      portfolio: "",
+      resumeUrl: "",
+      customMessage: "",
     },
   })
 
   async function onSubmit(values: ApplyFormValues) {
-    try {
-      setIsLoading(true)
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+    const payload: {
+      coverLetter?: string;
+      resumeUrl?: string;
+      customMessage?: string;
+    } = {};
 
-      setSubmitted(true)
-      // Auto-close after 3 seconds
-      setTimeout(() => {
-        onSuccess?.()
-      }, 3000)
-    } catch (error) {
-      console.error("[v0] Form submission error:", error)
-    } finally {
-      setIsLoading(false)
-    }
+    if (values.coverLetter) payload.coverLetter = values.coverLetter;
+    const finalResumeUrl = resumeUrl || values.resumeUrl;
+    if (finalResumeUrl) payload.resumeUrl = finalResumeUrl;
+    if (values.customMessage) payload.customMessage = values.customMessage;
+
+    createApplication(payload as any, {
+      onSuccess: () => {
+        setSubmitted(true)
+        setTimeout(() => {
+          onSuccess?.()
+        }, 3000)
+      },
+    })
   }
 
   if (submitted) {
@@ -92,81 +99,61 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Full Name */}
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name *</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* Resume Upload */}
+          <div className="space-y-3">
+            <FormLabel>Resume (Optional)</FormLabel>
+            {resumeUrl ? (
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-4">
+                <div className="flex items-center gap-3">
+                  <FileText className="size-5 text-polynesian_blue" />
+                  <div>
+                    <p className="text-sm font-medium">Resume uploaded</p>
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-polynesian_blue hover:underline"
+                    >
+                      View resume
+                    </a>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setResumeUrl(null)
+                    form.setValue("resumeUrl", "")
+                  }}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <UploadButton
+                  endpoint="resumeUploader"
+                  onClientUploadComplete={(res) => {
+                    if (res && res[0]) {
+                      setResumeUrl(res[0].url)
+                      form.setValue("resumeUrl", res[0].url)
+                      toast.success("Resume uploaded successfully!")
+                    }
+                  }}
+                  onUploadError={(error: Error) => {
+                    toast.error(`Upload failed: ${error.message}`)
+                  }}
+                  appearance={{
+                    button:
+                      "ut-ready:bg-polynesian_blue ut-uploading:cursor-not-allowed ut-uploading:bg-polynesian_blue/50 bg-polynesian_blue text-white",
+                    allowedContent: "text-xs text-muted-foreground",
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">Upload your resume (PDF, max 8MB)</p>
+              </div>
             )}
-          />
-
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email Address *</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="john@example.com" {...field} />
-                </FormControl>
-                <FormDescription>We'll use this to contact you about your application.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Phone */}
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number *</FormLabel>
-                <FormControl>
-                  <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* LinkedIn URL */}
-          <FormField
-            control={form.control}
-            name="linkedinUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>LinkedIn Profile (Optional)</FormLabel>
-                <FormControl>
-                  <Input type="url" placeholder="https://linkedin.com/in/johndoe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Portfolio */}
-          <FormField
-            control={form.control}
-            name="portfolio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Portfolio / Website (Optional)</FormLabel>
-                <FormControl>
-                  <Input type="url" placeholder="https://johndoe.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          </div>
 
           {/* Cover Letter */}
           <FormField
@@ -174,7 +161,7 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
             name="coverLetter"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cover Letter *</FormLabel>
+                <FormLabel>Cover Letter (Optional)</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Tell us why you're interested in this opportunity and what makes you a great fit for the role..."
@@ -182,7 +169,27 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>{field.value.length}/2000 characters</FormDescription>
+                <FormDescription>{(field.value?.length || 0)}/2000 characters</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Custom Message */}
+          <FormField
+            control={form.control}
+            name="customMessage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Additional Message (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Any additional information you'd like to share..."
+                    className="min-h-24 resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>{(field.value?.length || 0)}/1000 characters</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -191,10 +198,10 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={isPending}
               className="flex-1 bg-polynesian_blue hover:bg-polynesian_blue/90"
             >
-              {isLoading ? "Submitting..." : "Submit Application"}
+              {isPending ? "Submitting..." : "Submit Application"}
             </Button>
             <Button type="button" onClick={onCancel} variant="outline" className="flex-1 bg-transparent">
               Cancel

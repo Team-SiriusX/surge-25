@@ -1,21 +1,21 @@
 "use client";
 
 import { JobCard } from "./job-card";
-import { mockJobPosts } from "@/lib/mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SavedJobsViewProps {
-  savedJobIds: Set<string>;
-  onSave?: (jobId: string) => void;
+  savedJobs: any[];
+  isLoading?: boolean;
+  onUnsave?: (jobId: string) => void;
   onViewDetails?: (jobId: string) => void;
 }
 
 export function SavedJobsView({
-  savedJobIds,
-  onSave,
+  savedJobs,
+  isLoading,
+  onUnsave,
   onViewDetails,
 }: SavedJobsViewProps) {
-  const savedJobs = mockJobPosts.filter((job) => savedJobIds.has(job.id));
-
   return (
     <div>
       <div className="mb-8">
@@ -25,7 +25,15 @@ export function SavedJobsView({
         </p>
       </div>
 
-      {savedJobs.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-48 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : savedJobs.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border py-12">
           <p className="text-lg font-semibold text-foreground">
             No saved jobs yet
@@ -36,15 +44,15 @@ export function SavedJobsView({
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* {savedJobs.map((job) => (
+          {savedJobs.map((saved) => (
             <JobCard
-              key={job.id}
-              job={job}
+              key={saved.jobPostId}
+              job={saved.jobPost}
               isSaved={true}
-              onSave={onSave}
+              onSave={(jobId) => onUnsave?.(jobId)}
               onViewDetails={onViewDetails}
             />
-          ))} */}
+          ))}
         </div>
       )}
     </div>

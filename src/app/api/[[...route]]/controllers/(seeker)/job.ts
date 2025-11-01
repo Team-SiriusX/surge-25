@@ -246,6 +246,13 @@ const app = new Hono()
           },
         });
 
+        // Get all saved job IDs for current user
+        const savedJobIds = await db.savedJob.findMany({
+          where: { userId: user.id },
+          select: { jobPostId: true },
+        });
+        const savedJobIdsSet = new Set(savedJobIds.map((sj) => sj.jobPostId));
+
         // Calculate match scores and relevance scores for each job
         const jobsWithScores = allJobs.map((job) => {
           const matchScore = calculateMatchScore(
@@ -286,6 +293,7 @@ const app = new Hono()
             ...job,
             matchScore,
             relevanceScore,
+            hasSaved: savedJobIdsSet.has(job.id),
           };
         });
 
@@ -653,6 +661,152 @@ const app = new Hono()
       console.error("Error fetching saved jobs:", error);
       return c.json({ message: "Failed to fetch saved jobs" }, 500);
     }
-  });
+  })
+  // Submit application for a job
+  .post(
+    "/:id/apply",
+    zValidator(
+      "param",
+      z.object({
+        id: z.string(),
+      })
+    ),
+    zValidator(
+      "json",
+      z.object({
+        coverLetter: z
+          .string()
+          .min(50, "Cover letter must be at least 50 characters")
+          .max(2000, "Cover letter must not exceed 2000 characters")
+          .optional(),
+        resumeUrl: z.string().url("Invalid resume URL").optional(),
+        customMessage: z
+          .string()
+          .max(1000, "Custom message must not exceed 1000 characters")
+          .optional(),
+      })
+    ),
+    async (c) => {
+      try {
+        const sessionUser = await currentUser();
+        if (!sessionUser) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
+
+        const { id: jobPostId } = c.req.valid("param");
+        const applicationData = c.req.valid("json");
+
+        // Fetch full user profile
+        const user = await db.user.findUnique({
+          where: { id: sessionUser.id },
+          select: {
+            id: true,
+            skills: true,
+            interests: true,
+            major: true,
+            name: true,
+            email: true,
+          },
+        });
+
+        if (!user) {
+          return c.json({ message: "User not found" }, 404);
+        }
+
+        // Check if job exists
+        const job = await db.jobPost.findUnique({
+          where: { id: jobPostId },
+          include: {
+            poster: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+
+        if (!job) {
+          return c.json({ message: "Job not found" }, 404);
+        }
+
+        // Check if user is trying to apply to their own job
+        if (job.posterId === user.id) {
+          return c.json(
+            { message: "You cannot apply to your own job post" },
+            400
+          );
+        }
+
+        // Check if already applied
+        const existingApplication = await db.application.findUnique({
+          where: {
+            jobPostId_applicantId: {
+              jobPostId,
+              applicantId: user.id,
+            },
+          },
+        });
+
+        if (existingApplication) {
+          return c.json(
+            { message: "You have already applied to this job" },
+            400
+          );
+        }
+
+        // Calculate match score
+        const matchScore = calculateMatchScore(
+          {
+            category: job.category,
+            tags: job.tags,
+            requirements: job.requirements,
+          },
+          {
+            skills: user.skills,
+            interests: user.interests,
+            major: user.major,
+          }
+        );
+
+        // Create application with the new schema
+        const application = await db.application.create({
+          data: {
+            jobPostId,
+            applicantId: user.id,
+            coverLetter: applicationData.coverLetter || null,
+            resumeUrl: applicationData.resumeUrl || null,
+            customMessage: applicationData.customMessage || null,
+            matchScore,
+            status: "PENDING",
+          },
+        });
+
+        // Create notification for job poster
+        await db.notification.create({
+          data: {
+            userId: job.posterId,
+            type: "APPLICATION_RECEIVED",
+            title: "New Application Received",
+            message: `${user.name || "A student"} applied for "${job.title}"`,
+            link: `/finder/applications/${application.id}`,
+            metadata: {
+              applicationId: application.id,
+              jobPostId,
+              applicantId: user.id,
+            },
+          },
+        });
+
+        return c.json({
+          data: application,
+          message: "Application submitted successfully",
+        });
+      } catch (error) {
+        console.error("Error submitting application:", error);
+        return c.json({ message: "Failed to submit application" }, 500);
+      }
+    }
+  );
 
 export default app;

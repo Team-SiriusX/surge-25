@@ -4,11 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Clock, DollarSign } from "lucide-react";
 import { JobPost, JobType } from "@/generated/prisma";
+import Link from "next/link";
 
 interface JobCardProps {
-  job: JobPost;
+  job: JobPost & { hasSaved?: boolean; matchScore?: number };
   isSaved?: boolean;
-  onSave?: (jobId: string) => void;
+  onSave?: (jobId: string, isSaved: boolean) => void;
   onViewDetails?: (jobId: string) => void;
 }
 
@@ -36,28 +37,35 @@ export function JobCard({
   onSave,
   onViewDetails,
 }: JobCardProps) {
+  const saved = isSaved ?? job.hasSaved ?? false;
+
   return (
     <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="p-6">
         <div className="mb-4 flex items-start justify-between">
           <div className="flex-1">
-            <Badge className={jobTypeColors[job.type]}>
-              {jobTypeLabels[job.type]}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className={jobTypeColors[job.type]}>
+                {jobTypeLabels[job.type]}
+              </Badge>
+              {job.matchScore !== undefined && (
+                <Badge variant="outline" className="text-xs">
+                  {job.matchScore}% Match
+                </Badge>
+              )}
+            </div>
             <h3 className="mt-3 text-xl font-semibold text-foreground line-clamp-2">
               {job.title}
             </h3>
           </div>
           <button
-            onClick={() => onSave?.(job.id)}
+            onClick={() => onSave?.(job.id, saved)}
             className="ml-2 transition-transform duration-200 hover:scale-110"
-            aria-label={isSaved ? "Remove from saved" : "Save job"}
+            aria-label={saved ? "Remove from saved" : "Save job"}
           >
             <Heart
               size={24}
-              className={
-                isSaved ? "fill-red-500 text-red-500" : "text-gray-400"
-              }
+              className={saved ? "fill-red-500 text-red-500" : "text-gray-400"}
             />
           </button>
         </div>
@@ -100,12 +108,11 @@ export function JobCard({
           )}
         </div>
 
-        <Button
-          onClick={() => onViewDetails?.(job.id)}
-          className="w-full bg-primary hover:bg-primary/90"
-        >
-          View Details
-        </Button>
+        <Link href={`/seeker/jobs/${job.id}`}>
+          <Button className="w-full bg-primary hover:bg-primary/90">
+            View Details
+          </Button>
+        </Link>
       </div>
     </Card>
   );
