@@ -10,3 +10,9 @@ export { useDeleteJob } from "./use-delete-job";
 // Application Queries
 export { useGetApplications } from "./use-get-applications";
 export { useGetApplication } from "./use-get-application";
+
+// Application Mutations
+export { useUpdateApplicationStatus } from "./use-update-application-status";
+
+// Dashboard Stats
+export { useGetDashboardStats } from "./use-get-dashboard-stats";

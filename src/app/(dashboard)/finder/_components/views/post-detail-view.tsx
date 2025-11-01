@@ -190,7 +190,7 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
           </Card>
 
           {/* Actions */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle className="text-base">Actions</CardTitle>
             </CardHeader>
@@ -214,7 +214,7 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
                 {isDeleting ? "Deleting..." : "Delete"}
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

@@ -1,8 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { handle } from "hono/vercel";
-import { sample } from "./controllers/(base)";
-import { job, application } from "./controllers/(finder)";
+import { finder, sample, seeker } from "./controllers";
 import { profile } from "./controllers/(profile)";
 import { ZodError } from "zod";
 
@@ -13,10 +12,13 @@ app.onError((err, c) => {
 
   // Handle Zod validation errors
   if (err instanceof ZodError) {
-    const errors = err.errors.map(e => `${e.path.join('.')}: ${e.message}`);
-    return c.json({ 
-      error: errors.length === 1 ? errors[0] : errors.join(', ') 
-    }, 400);
+    const errors = err.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+    return c.json(
+      {
+        error: errors.length === 1 ? errors[0] : errors.join(", "),
+      },
+      400
+    );
   }
 
   if (err instanceof HTTPException) {
@@ -28,8 +30,8 @@ app.onError((err, c) => {
 
 const routes = app
   .route("/sample", sample)
-  .route("/jobs", job)
-  .route("/applications", application)
+  .route("/finder", finder)
+  .route("/seeker", seeker)
   .route("/profile", profile);
 
 export const GET = handle(app);

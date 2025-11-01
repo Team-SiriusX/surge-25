@@ -1,20 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
-
-import { QUERY_KEYS } from "@/constants/query-keys";
 import { client } from "@/lib/hono";
+import { QUERY_KEYS } from "@/constants/query-keys";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.finder.jobs)[":id"]["$get"]
+  (typeof client.api.seeker.jobs)[":id"]["$get"]
 >;
 
 export const useGetJob = (id?: string) => {
-  const query = useQuery({
-    queryKey: [QUERY_KEYS.FINDER_JOB, id],
+  return useQuery({
+    queryKey: [QUERY_KEYS.SEEKER_JOB, id],
     queryFn: async () => {
       if (!id) throw new Error("Job ID is required");
 
-      const response = await client.api.finder.jobs[":id"].$get({
+      const response = await client.api.seeker.jobs[":id"].$get({
         param: { id },
       });
 
@@ -26,6 +25,4 @@ export const useGetJob = (id?: string) => {
     },
     enabled: !!id,
   });
-
-  return query;
 };

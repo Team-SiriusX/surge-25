@@ -5,15 +5,15 @@ import { client } from "@/lib/hono";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/constants/query-keys";
 
-type ResponseType = InferResponseType<typeof client.api.jobs.$post>;
-type RequestType = InferRequestType<typeof client.api.jobs.$post>["json"];
+type ResponseType = InferResponseType<typeof client.api.finder.jobs.$post>;
+type RequestType = InferRequestType<typeof client.api.finder.jobs.$post>["json"];
 
 export const useCreateJob = () => {
   const queryClient = useQueryClient();
   
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
-      const response = await client.api.jobs.$post({ json });
+      const response = await client.api.finder.jobs.$post({ json });
 
       if (!response.ok) {
         throw new Error("Failed to create job post");

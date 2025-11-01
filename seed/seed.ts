@@ -140,51 +140,61 @@ async function main() {
     console.log(`✅ Found user: ${targetUser.name} (${targetUser.email})`);
   }
 
-  const users = await Promise.all([
-    // Admin user
-    prisma.user.create({
-      data: {
-        name: "Admin User",
-        email: "admin@campusconnect.com",
-        emailVerified: true,
-        role: UserRole.ADMIN,
-        bio: "Platform administrator",
-        skills: ["Management", "Support"],
-        interests: ["Community Building"],
-        university: "MIT",
-        major: "Computer Science",
-        graduationYear: 2024,
-        profileScore: 100,
-      },
-    }),
-    // Regular users
-    ...Array.from({ length: 20 }, (_, i) =>
+  // Check if users already exist
+  const existingUsers = await prisma.user.findMany();
+  let users: any[] = [];
+
+  if (existingUsers.length > 0) {
+    console.log(`✅ Found ${existingUsers.length} existing users, skipping user creation`);
+    users = existingUsers;
+  } else {
+    console.log("Creating new users...");
+    users = await Promise.all([
+      // Admin user
       prisma.user.create({
         data: {
-          name: `User ${i + 1}`,
-          email: `user${i + 1}@example.com`,
-          emailVerified: i % 3 !== 0, // Some unverified emails
-          image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 1}`,
-          role: UserRole.USER,
-          bio: `I'm a passionate student interested in technology and innovation. Looking for opportunities to grow and collaborate on exciting projects.`,
-          skills: pickRandom(skills, Math.floor(Math.random() * 8) + 3),
-          interests: pickRandom(interests, Math.floor(Math.random() * 6) + 2),
-          resume: i % 2 === 0 ? `https://example.com/resume${i + 1}.pdf` : null,
-          phone: i % 3 === 0 ? `+1-555-${1000 + i}` : null,
-          linkedIn: i % 2 === 0 ? `https://linkedin.com/in/user${i + 1}` : null,
-          github: i % 2 === 0 ? `https://github.com/user${i + 1}` : null,
-          portfolio: i % 3 === 0 ? `https://portfolio-user${i + 1}.com` : null,
-          university:
-            universities[Math.floor(Math.random() * universities.length)],
-          major: majors[Math.floor(Math.random() * majors.length)],
-          graduationYear: 2024 + Math.floor(Math.random() * 4),
-          profileScore: Math.floor(Math.random() * 40) + 60,
+          name: "Admin User",
+          email: "admin@campusconnect.com",
+          emailVerified: true,
+          role: UserRole.ADMIN,
+          bio: "Platform administrator",
+          skills: ["Management", "Support"],
+          interests: ["Community Building"],
+          university: "MIT",
+          major: "Computer Science",
+          graduationYear: 2024,
+          profileScore: 100,
         },
-      })
-    ),
-  ]);
+      }),
+      // Regular users
+      ...Array.from({ length: 20 }, (_, i) =>
+        prisma.user.create({
+          data: {
+            name: `User ${i + 1}`,
+            email: `user${i + 1}@example.com`,
+            emailVerified: i % 3 !== 0, // Some unverified emails
+            image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 1}`,
+            role: UserRole.USER,
+            bio: `I'm a passionate student interested in technology and innovation. Looking for opportunities to grow and collaborate on exciting projects.`,
+            skills: pickRandom(skills, Math.floor(Math.random() * 8) + 3),
+            interests: pickRandom(interests, Math.floor(Math.random() * 6) + 2),
+            resume: i % 2 === 0 ? `https://example.com/resume${i + 1}.pdf` : null,
+            phone: i % 3 === 0 ? `+1-555-${1000 + i}` : null,
+            linkedIn: i % 2 === 0 ? `https://linkedin.com/in/user${i + 1}` : null,
+            github: i % 2 === 0 ? `https://github.com/user${i + 1}` : null,
+            portfolio: i % 3 === 0 ? `https://portfolio-user${i + 1}.com` : null,
+            university:
+              universities[Math.floor(Math.random() * universities.length)],
+            major: majors[Math.floor(Math.random() * majors.length)],
+            graduationYear: 2024 + Math.floor(Math.random() * 4),
+            profileScore: Math.floor(Math.random() * 40) + 60,
+          },
+        })
+      ),
+    ]);
 
-  console.log(`✅ Created ${users.length} users`);
+    console.log(`✅ Created ${users.length} users`);
+  }
 
   // Create Job Posts
   console.log("💼 Creating job posts...");
@@ -281,7 +291,9 @@ async function main() {
     // If userId provided, make this user the poster for all jobs
     // Otherwise, randomly select a poster from the created users
     const poster =
-      targetUser || users[Math.floor(Math.random() * (users.length - 10)) + 1]; // Avoid admin
+      targetUser && Math.random() > 0.3  // 70% chance target user, 30% other users
+        ? targetUser 
+        : users[Math.floor(Math.random() * users.length)];
 
     const titles = jobTitles[type];
     const descriptions = jobDescriptions[type];
@@ -362,10 +374,14 @@ async function main() {
   for (let i = 0; i < 100; i++) {
     const job = activeJobs[Math.floor(Math.random() * activeJobs.length)];
 
-    // If userId provided, make this user the applicant for all applications
-    // Otherwise, randomly select an applicant from the created users
-    const applicant =
-      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
+    // Select applicant: if userId provided and sometimes random user, otherwise always random
+    let applicant: any;
+    if (targetUser && Math.random() > 0.3) {
+      // 70% chance use target user, 30% use random user for diversity
+      applicant = targetUser;
+    } else {
+      applicant = users[Math.floor(Math.random() * users.length)];
+    }
 
     // Skip if user is the poster or application already exists
     if (applicant.id === job.posterId) continue;
@@ -414,6 +430,29 @@ async function main() {
 
   console.log(`✅ Created ${applications.length} applications`);
 
+  // Update job posts with application counts
+  console.log("📊 Updating job post application counts...");
+  const jobApplicationCounts = new Map<string, number>();
+  
+  // Count applications per job
+  for (const app of applications) {
+    const count = jobApplicationCounts.get(app.jobPostId) || 0;
+    jobApplicationCounts.set(app.jobPostId, count + 1);
+  }
+  
+  // Update each job post
+  for (const [jobId, count] of jobApplicationCounts.entries()) {
+    await prisma.jobPost.update({
+      where: { id: jobId },
+      data: { 
+        applicationsCount: count,
+        interestRate: count > 0 ? count / (jobPosts.find(j => j.id === jobId)?.views || 1) : 0
+      },
+    });
+  }
+  
+  console.log(`✅ Updated ${jobApplicationCounts.size} job posts with application counts`);
+
   // Create Saved Jobs
   console.log("💾 Creating saved jobs...");
   const savedJobs: any[] = [];
@@ -421,10 +460,14 @@ async function main() {
   for (let i = 0; i < 80; i++) {
     const job = jobPosts[Math.floor(Math.random() * jobPosts.length)];
 
-    // If userId provided, make this user save all jobs
-    // Otherwise, randomly select a user from the created users
-    const user =
-      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
+    // Select user: if userId provided and sometimes random user, otherwise always random
+    let user: any;
+    if (targetUser && Math.random() > 0.3) {
+      // 70% chance use target user, 30% use random user for diversity
+      user = targetUser;
+    } else {
+      user = users[Math.floor(Math.random() * users.length)];
+    }
 
     // Skip if user is the poster
     if (user.id === job.posterId) continue;
@@ -453,21 +496,22 @@ async function main() {
   const messages: any[] = [];
 
   for (let i = 0; i < 30; i++) {
-    // If userId provided, make this user part of all conversations
-    // Otherwise, create conversations between random users
+    // Create diverse conversations
     let user1: any, user2: any;
 
-    if (targetUser) {
+    if (targetUser && Math.random() > 0.3) {
+      // 70% chance target user is in conversation
       user1 = targetUser;
-      user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+      user2 = users[Math.floor(Math.random() * users.length)];
 
       // Ensure user2 is not the same as user1
       while (user2.id === user1.id) {
-        user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+        user2 = users[Math.floor(Math.random() * users.length)];
       }
     } else {
-      user1 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
-      user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+      // 30% chance create conversation between other users
+      user1 = users[Math.floor(Math.random() * users.length)];
+      user2 = users[Math.floor(Math.random() * users.length)];
 
       if (user1.id === user2.id) continue;
     }
@@ -537,10 +581,14 @@ async function main() {
   const notifications: any[] = [];
 
   for (let i = 0; i < 100; i++) {
-    // If userId provided, create all notifications for this user
-    // Otherwise, randomly select a user from the created users
-    const user =
-      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
+    // Select user: if userId provided and sometimes random user, otherwise always random
+    let user: any;
+    if (targetUser && Math.random() > 0.3) {
+      // 70% chance use target user, 30% use random user for diversity
+      user = targetUser;
+    } else {
+      user = users[Math.floor(Math.random() * users.length)];
+    }
 
     const notificationTypes = Object.values(NotificationType);
     const type = notificationTypes[
