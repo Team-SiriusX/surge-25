@@ -13,7 +13,7 @@ export interface Applicant {
   location: string
   role: string
   experience: number
-  status: "SHORTLISTED" | "REVIEWING" | "REJECTED"
+  status: "SHORTLISTED" | "PENDING" | "REJECTED" | "ACCEPTED"
   appliedAt: string
   matchScore: number
 }
@@ -30,7 +30,9 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
     switch (status) {
       case "SHORTLISTED":
         return "bg-green-100 text-green-800"
-      case "REVIEWING":
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800"
+      case "ACCEPTED":
         return "bg-blue-100 text-blue-800"
       case "REJECTED":
         return "bg-red-100 text-red-800"
@@ -45,7 +47,7 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
         <Card
           key={applicant.id}
           className="hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => router.push(`/posts/${postId}/applicants/${applicant.id}`)}
+          onClick={() => router.push(`/finder/posts/${postId}/applicants/${applicant.id}`)}
         >
           <CardContent className="pt-6">
             <div className="flex items-start justify-between">
@@ -88,9 +90,11 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
                 <Badge className={getStatusColor(applicant.status)}>
                   {applicant.status === "SHORTLISTED"
                     ? "Shortlisted"
-                    : applicant.status === "REVIEWING"
-                      ? "Reviewing"
-                      : "Rejected"}
+                    : applicant.status === "PENDING"
+                      ? "Pending"
+                      : applicant.status === "ACCEPTED"
+                        ? "Accepted"
+                        : "Rejected"}
                 </Badge>
               </div>
             </div>

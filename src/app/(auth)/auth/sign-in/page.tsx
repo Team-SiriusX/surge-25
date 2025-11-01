@@ -11,6 +11,7 @@ import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -130,7 +131,7 @@ export default function SignIn() {
                     await signIn.social(
                     {
                       provider: "google",
-                      callbackURL: "/dashboard"
+                      callbackURL: "/seeker"
                     },
                     {
                       onRequest: (ctx) => {
@@ -161,7 +162,7 @@ export default function SignIn() {
                     await signIn.social(
                     {
                       provider: "github",
-                      callbackURL: "/dashboard"
+                      callbackURL: DEFAULT_LOGIN_REDIRECT
                     },
                     {
                       onRequest: (ctx) => {
