@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { pusherServer } from "@/lib/pusher";
-import { ApplicationStatus, UserRole } from "@/types/models";
+import { ApplicationStatus } from "@/types/models";
 
 const conversationListInclude = {
   participants: {
@@ -213,14 +213,12 @@ const app = new Hono()
       )
     );
 
-    const filteredConversations =
-      session.user.role === UserRole.FINDER
-        ? conversations.filter((conversation) => {
-            if (!conversation.jobPostId) return true;
-            const status = conversation.application?.status;
-            return status === ApplicationStatus.SHORTLISTED;
-          })
-        : conversations;
+    // Filter to only show conversations with shortlisted applicants
+    const filteredConversations = conversations.filter((conversation) => {
+      if (!conversation.jobPostId) return true; // Non-job conversations are always visible
+      const status = conversation.application?.status;
+      return status === ApplicationStatus.SHORTLISTED; // Only show shortlisted
+    });
 
     return c.json({ conversations: filteredConversations });
   })
@@ -255,7 +253,8 @@ const app = new Hono()
       return c.json({ error: "Not authorized to view this conversation" }, 403);
     }
 
-    if (session.user.role === UserRole.FINDER && baseConversation.jobPostId) {
+    // Verify this is a shortlisted conversation if it's job-related
+    if (baseConversation.jobPostId) {
       const application = await getConversationApplication(
         baseConversation,
         session.user.id
@@ -329,11 +328,8 @@ const app = new Hono()
         return c.json({ error: "Cannot create a conversation with yourself" }, 400);
       }
 
-      if (session.user.role === UserRole.FINDER) {
-        if (!jobPostId) {
-          return c.json({ error: "Job post is required to message applicants" }, 400);
-        }
-
+      // Verify shortlisted status for job-related conversations
+      if (jobPostId) {
         const shortlistedApplication = await db.application.findFirst({
           where: {
             jobPostId,
@@ -451,7 +447,8 @@ const app = new Hono()
         return c.json({ error: "Not authorized to send messages" }, 403);
       }
 
-      if (session.user.role === UserRole.FINDER && conversation.jobPostId) {
+      // Verify shortlisted status for job-related conversations
+      if (conversation.jobPostId) {
         const application = await getConversationApplication(
           conversation,
           session.user.id
