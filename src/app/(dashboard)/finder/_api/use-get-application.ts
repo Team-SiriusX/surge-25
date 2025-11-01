@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { client } from "@/lib/hono";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.applications)[":id"]["$get"]
+  (typeof client.api.finder.applications)[":id"]["$get"]
 >;
 
 export const useGetApplication = (id?: string) => {
@@ -14,7 +14,7 @@ export const useGetApplication = (id?: string) => {
     queryFn: async () => {
       if (!id) throw new Error("Application ID is required");
 
-      const response = await client.api.applications[":id"].$get({
+      const response = await client.api.finder.applications[":id"].$get({
         param: { id },
       });
 

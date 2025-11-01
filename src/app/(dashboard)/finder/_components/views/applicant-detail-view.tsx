@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { useGetApplication } from "../../_api"
+import { useGetApplication, useUpdateApplicationStatus } from "../../_api"
 
 interface ApplicantDetailViewProps {
   postId: string
@@ -15,8 +15,21 @@ interface ApplicantDetailViewProps {
 export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailViewProps) {
   const router = useRouter()
   const { data, isLoading } = useGetApplication(applicantId)
+  const { mutate: updateStatus, isPending: isUpdating } = useUpdateApplicationStatus(applicantId)
 
   const application = data?.data
+
+  const handleShortlist = () => {
+    updateStatus({ status: "SHORTLISTED" })
+  }
+
+  const handleReject = () => {
+    updateStatus({ status: "REJECTED" })
+  }
+
+  const handleAccept = () => {
+    updateStatus({ status: "ACCEPTED" })
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -247,16 +260,18 @@ export function ApplicantDetailView({ postId, applicantId }: ApplicantDetailView
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-center gap-2 border-green-200 text-green-700 hover:bg-green-50 bg-transparent"
-                disabled={application.status === "SHORTLISTED"}
+                className="w-full justify-center gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-700 bg-transparent"
+                disabled={application.status === "SHORTLISTED" || isUpdating}
+                onClick={handleShortlist}
               >
                 <CheckCircle className="w-4 h-4" />
                 {application.status === "SHORTLISTED" ? "Shortlisted" : "Shortlist"}
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-center gap-2 border-red-200 text-red-700 hover:bg-red-50 bg-transparent"
-                disabled={application.status === "REJECTED"}
+                className="w-full justify-center gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700bg-transparent"
+                disabled={application.status === "REJECTED" || isUpdating}
+                onClick={handleReject}
               >
                 <XCircle className="w-4 h-4" />
                 {application.status === "REJECTED" ? "Rejected" : "Reject"}

@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { client } from "@/lib/hono";
 import { $Enums } from "@/generated/prisma";
 
-type ResponseType = InferResponseType<typeof client.api.jobs.$get>;
+type ResponseType = InferResponseType<typeof client.api.finder.jobs.$get>;
 
 type QueryParams = {
   type?: $Enums.JobType;
@@ -33,7 +33,7 @@ export const useGetJobs = (params?: QueryParams) => {
       if (params?.page) queryParams.page = String(params.page);
       if (params?.limit) queryParams.limit = String(params.limit);
 
-      const response = await client.api.jobs.$get({
+      const response = await client.api.finder.jobs.$get({
         query: queryParams,
       });
 

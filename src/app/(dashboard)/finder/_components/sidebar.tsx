@@ -11,15 +11,14 @@ export function Sidebar() {
   const navItems = [
     { href: "/finder", label: "Dashboard", icon: LayoutDashboard },
     { href: "/finder/posts", label: "My Posts", icon: FileText },
-    { href: "/finder/messages", label: "Messages", icon: MessageSquare },
   ]
 
   return (
     <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-sidebar-border">
+      <div className="p-6 border-b border-white">
         <h1 className="text-2xl font-bold">Talent Finder</h1>
-        <p className="text-sm text-sidebar-accent mt-1">Post & Recruit</p>
+        <p className="text-sm text-white mt-1">Post & Recruit</p>
       </div>
 
       {/* Navigation */}
@@ -35,7 +34,7 @@ export function Sidebar() {
                 "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left",
                 isActive
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-accent hover:bg-sidebar-border",
+                  : "text-white hover:bg-sidebar-border",
               )}
             >
               <Icon className="w-5 h-5" />
@@ -46,8 +45,8 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border">
-        <p className="text-xs text-sidebar-accent text-center">© 2025 Talent Finder</p>
+      <div className="p-4 border-t border-white">
+        <p className="text-xs text-white text-center">© 2025 Talent Finder</p>
       </div>
     </aside>
   )

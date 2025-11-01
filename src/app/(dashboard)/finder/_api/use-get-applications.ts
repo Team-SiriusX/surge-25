@@ -6,7 +6,7 @@ import { client } from "@/lib/hono";
 import { $Enums } from "@/generated/prisma";
 
 type ResponseType = InferResponseType<
-  typeof client.api.applications.$get
+  typeof client.api.finder.applications.$get
 >;
 
 type QueryParams = {
@@ -33,7 +33,7 @@ export const useGetApplications = (params?: QueryParams) => {
       if (params?.page) queryParams.page = String(params.page);
       if (params?.limit) queryParams.limit = String(params.limit);
 
-      const response = await client.api.applications.$get({
+      const response = await client.api.finder.applications.$get({
         query: queryParams,
       });
 
