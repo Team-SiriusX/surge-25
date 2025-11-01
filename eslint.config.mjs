@@ -17,13 +17,26 @@ const eslintConfig = [
       "@typescript-eslint/no-this-alias": "off",
     },
     ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "src/generated/**",
+      "**/generated/**",
+      "**/.next/**",
+      "**/node_modules/**",
+      "**/out/**",
+      "**/build/**",
+      "**/dist/**",
     ],
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-this-alias": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }
+      ]
+    },
   },
 ];
 

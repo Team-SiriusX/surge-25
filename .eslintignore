@@ -1,6 +1,18 @@
-node_modules
-.next
-out
-build
-dist
-src/generated
+# Generated files
+src/generated/**
+**/prisma/runtime/**
+**/prisma/wasm.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Misc
+*.log
+.DS_Store
+>>>>>>> f0884513d1eb6c26287e45ce555dc63b44586692

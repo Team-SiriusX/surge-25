@@ -119,7 +119,7 @@ export function DashboardView() {
             Welcome back, John!
           </h1>
           <p className="text-muted-foreground mt-2">
-            Here's your recruitment overview
+            Here&apos;s your recruitment overview
           </p>
         </div>
       </div>

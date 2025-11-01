@@ -1,58 +1,96 @@
 "use client";
 
-import { DynamicNavigation } from "@/components/ui/dynamic-navigation";
-import { Home, Users, Briefcase, Mail, Sparkles } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  NavbarLogo,
+  NavbarButton,
+  MobileNav,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
 
-const navigationLinks = [
-  { 
-    id: "home", 
-    label: "Home", 
-    href: "/", 
-    icon: <Home size={16} /> 
-  },
-  { 
-    id: "about", 
-    label: "About", 
-    href: "/about", 
-    icon: <Users size={16} /> 
-  },
-  { 
-    id: "projects", 
-    label: "Projects", 
-    href: "/projects", 
-    icon: <Briefcase size={16} /> 
-  },
-  { 
-    id: "sample", 
-    label: "Sample", 
-    href: "/sample", 
-    icon: <Sparkles size={16} /> 
-  },
-  { 
-    id: "contact", 
-    label: "Contact", 
-    href: "/contact", 
-    icon: <Mail size={16} /> 
-  },
+const navItems = [
+  { name: "Home", link: "/" },
+  { name: "About", link: "/about" },
+  { name: "Projects", link: "/projects" },
+  { name: "Sample", link: "/sample" },
+  { name: "Contact", link: "/contact" },
 ];
 
 export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4">
-      <div className="w-full max-w-2xl">
-        <DynamicNavigation
-          links={navigationLinks}
-          backgroundColor="rgba(255, 255, 255, 0.05)"
-          textColor="#ffffff"
-          highlightColor="rgba(255, 255, 255, 0.15)"
-          glowIntensity={8}
-          showLabelsOnMobile={false}
-          enableRipple={true}
-          onLinkClick={(id) => {
-            console.log("Navigating to:", id);
-          }}
-        />
-      </div>
-    </header>
+    <Navbar>
+      {/* Desktop Navigation */}
+      <NavBody>
+        <NavbarLogo />
+        <NavItems items={navItems} />
+        <div className="flex items-center gap-3">
+          <NavbarButton
+            variant="secondary"
+            onClick={() => router.push("/auth/sign-in")}
+          >
+            Login
+          </NavbarButton>
+          <NavbarButton
+            variant="primary"
+            onClick={() => router.push("/auth/sign-up")}
+          >
+            Sign up
+          </NavbarButton>
+        </div>
+      </NavBody>
+
+      {/* Mobile Navigation */}
+      <MobileNav>
+        <MobileNavHeader>
+          <NavbarLogo />
+          <MobileNavToggle isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+        </MobileNavHeader>
+
+        <MobileNavMenu isOpen={isOpen} onClose={() => setIsOpen(false)}>
+          {navItems.map((item, idx) => (
+            <Link
+              key={`mobile-nav-${idx}`}
+              href={item.link}
+              className="text-sm font-medium text-neutral-300 transition-colors hover:text-white"
+              onClick={() => setIsOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <div className="mt-2 flex flex-col gap-2 border-t border-neutral-800 pt-4">
+            <NavbarButton
+              variant="secondary"
+              onClick={() => {
+                setIsOpen(false);
+                router.push("/auth/sign-in");
+              }}
+              className="w-full"
+            >
+              Login
+            </NavbarButton>
+            <NavbarButton
+              variant="primary"
+              onClick={() => {
+                setIsOpen(false);
+                router.push("/auth/sign-up");
+              }}
+              className="w-full"
+            >
+              Sign up
+            </NavbarButton>
+          </div>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
   );
 }
