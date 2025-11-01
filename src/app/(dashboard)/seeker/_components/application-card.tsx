@@ -13,7 +13,7 @@ interface ApplicationCardProps {
   jobTitle: string;
   jobType: string;
   jobId: string;
-  appliedAt: Date;
+  appliedAt: Date | string;
   status: ApplicationStatus;
   onViewDetails?: (jobId: string) => void;
 }
@@ -77,7 +77,7 @@ export function ApplicationCard({
             <Calendar size={16} />
             <span>
               Applied on{" "}
-              {appliedAt.toLocaleDateString("en-US", {
+              {new Date(appliedAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",

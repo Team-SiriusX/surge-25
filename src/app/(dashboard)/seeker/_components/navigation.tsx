@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Briefcase, FileText, Heart } from "lucide-react";
+import { Briefcase, FileText, Heart, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
 
 interface NavigationProps {
@@ -54,6 +54,17 @@ export function Navigation({ currentView }: NavigationProps) {
               <Link href="/seeker/saved">
                 <Heart size={18} />
                 <span className="hidden sm:inline">Saved</span>
+              </Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="secondary"
+              className="gap-2 ml-2"
+            >
+              <Link href="/finder">
+                <ArrowRightLeft size={18} />
+                <span className="hidden sm:inline">Switch to Finder</span>
               </Link>
             </Button>
           </div>

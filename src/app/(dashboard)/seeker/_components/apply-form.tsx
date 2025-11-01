@@ -40,6 +40,8 @@ interface ApplyFormProps {
 export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormProps) {
   const [submitted, setSubmitted] = useState(false)
   const [resumeUrl, setResumeUrl] = useState<string | null>(null)
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const { mutate: createApplication, isPending } = useCreateApplication(jobId)
 
   const form = useForm<ApplyFormValues>({
@@ -101,20 +103,39 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Resume Upload */}
           <div className="space-y-3">
-            <FormLabel className="text-base font-semibold">Resume (Optional)</FormLabel>
-            {resumeUrl ? (
-              <div className="rounded-lg border bg-muted/50 p-4">
+            <FormLabel className="text-base font-semibold">
+              Resume (Optional)
+              {resumeUrl && <span className="ml-2 text-xs font-normal text-green-600">✓ Uploaded</span>}
+            </FormLabel>
+            {isUploading ? (
+              <div className="rounded-lg border-2 border-primary/50 bg-primary/5 p-6">
+                <div className="flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="animate-spin rounded-full border-4 border-primary/20 border-t-primary p-4">
+                    <Upload className="size-6 text-primary" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">Uploading Resume...</p>
+                    <p className="text-xs text-muted-foreground">Please wait</p>
+                  </div>
+                </div>
+              </div>
+            ) : resumeUrl ? (
+              <div className="rounded-lg border-2 border-green-500/50 bg-green-50 dark:bg-green-950/20 p-4">
                 <div className="flex items-start gap-4">
-                  <FileText className="size-5 text-primary" />
+                  <div className="rounded-full bg-green-500/10 p-2">
+                    <CheckCircle className="size-5 text-green-600 dark:text-green-500" />
+                  </div>
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium">Resume uploaded</p>
+                    <p className="text-sm font-semibold text-green-900 dark:text-green-100">
+                      {resumeFileName || "Resume uploaded successfully"}
+                    </p>
                     <a
                       href={resumeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-green-700 hover:underline dark:text-green-400"
                     >
-                      View File
+                      View File →
                     </a>
                   </div>
                   <Button
@@ -123,10 +144,12 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
                     size="sm"
                     onClick={() => {
                       setResumeUrl(null)
+                      setResumeFileName(null)
                       form.setValue("resumeUrl", "")
                     }}
+                    className="hover:bg-green-100 dark:hover:bg-green-900/30"
                   >
-                    <X className="size-4" />
+                    <X className="size-4 text-green-700 dark:text-green-400" />
                   </Button>
                 </div>
               </div>
@@ -143,14 +166,22 @@ export function ApplyForm({ jobTitle, jobId, onSuccess, onCancel }: ApplyFormPro
                     </div>
                     <UploadButton
                       endpoint="resumeUploader"
+                      onBeforeUploadBegin={(files) => {
+                        setIsUploading(true)
+                        return files
+                      }}
                       onClientUploadComplete={(res) => {
+                        setIsUploading(false)
                         if (res && res[0]) {
+                          const fileName = res[0].name || "Resume.pdf"
                           setResumeUrl(res[0].url)
+                          setResumeFileName(fileName)
                           form.setValue("resumeUrl", res[0].url)
                           toast.success("Resume uploaded successfully!")
                         }
                       }}
                       onUploadError={(error: Error) => {
+                        setIsUploading(false)
                         toast.error(`Upload failed: ${error.message}`)
                       }}
                       appearance={{

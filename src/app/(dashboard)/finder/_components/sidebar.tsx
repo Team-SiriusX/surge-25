@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, MessageSquare } from "lucide-react"
+import { LayoutDashboard, FileText, MessageSquare, ArrowRightLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -45,7 +46,16 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white">
+      <div className="p-4 border-t border-white space-y-3">
+        <Link href="/seeker" className="block">
+          <Button 
+            variant="outline" 
+            className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+          >
+            <ArrowRightLeft className="w-4 h-4 mr-2" />
+            Switch to Seeker
+          </Button>
+        </Link>
         <p className="text-xs text-white text-center">© 2025 Talent Finder</p>
       </div>
     </aside>
