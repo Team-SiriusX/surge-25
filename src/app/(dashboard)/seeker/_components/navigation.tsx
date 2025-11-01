@@ -79,7 +79,7 @@ export function Navigation({ currentView }: NavigationProps) {
             </Button>
 
             <Button asChild variant="outline" className="gap-2">
-              <Link href="/seeker/messages">
+              <Link href="/messages">
                 <MessageSquare size={18} />
                 <span className="hidden sm:inline">Messages</span>
               </Link>

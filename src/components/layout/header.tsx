@@ -28,7 +28,7 @@ import { User, LogOut, LayoutDashboard } from "lucide-react";
 
 const navItems = [
   { name: "Home", link: "/" },
-  { name: "Dashboard", link: "/dashboard" },
+  { name: "About", link: "/about" },
   { name: "Contact", link: "/contact" },
 ];
 

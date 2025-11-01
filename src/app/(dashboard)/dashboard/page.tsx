@@ -2,9 +2,13 @@
 
 import { FocusCards, type Card } from "@/components/ui/focus-cards";
 import { motion } from "framer-motion";
-import { Briefcase, Search, ArrowRight, Sparkles } from "lucide-react";
+import { Briefcase, Search, ArrowRight, Sparkles, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  
   const cards: Card[] = [
     {
       title: "Talent Finder",
@@ -33,6 +37,23 @@ export default function DashboardPage() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
 
       <div className="relative z-10 container mx-auto px-6 py-16 md:py-24">
+        {/* Back Button */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-8"
+        >
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/")}
+            className="gap-2 hover:bg-primary/10"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
+        </motion.div>
+
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
