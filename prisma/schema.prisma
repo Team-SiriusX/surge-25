@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -15,16 +9,45 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  role          UserRole  @default(USER)
-  sessions      Session[]
-  accounts      Account[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  role          UserRole @default(USER)
+
+  // Profile fields for CampusConnect
+  bio            String?
+  skills         String[] // Array of skills
+  interests      String[] // Array of interests
+  resume         String?  // URL to resume file
+  phone          String?
+  linkedIn       String?
+  github         String?
+  portfolio      String?
+  university     String?
+  major          String?
+  graduationYear Int?
+  profileScore   Int?     @default(0) // Profile completeness score (0-100)
+
+  // Better-Auth relations
+  sessions Session[]
+  accounts Account[]
+
+  // CampusConnect relations
+  jobPosts     JobPost[]
+  applications Application[]
+  savedJobs    SavedJob[]
+
+  // Messaging relations
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  conversations    ConversationParticipant[]
+
+  // In-app Notifications
+  notifications Notification[]
 
   @@unique([email])
   @@map("user")
@@ -75,9 +98,223 @@ model Verification {
   @@map("verification")
 }
 
-// enum
+// Job Post Model
+model JobPost {
+  id          String      @id @default(cuid())
+  title       String
+  description String      @db.Text
+  type        JobType     // Enum for job types
+  category    JobCategory // enum for job categories
+  tags        String[]    // Array of tags for filtering
 
+  // Job Details
+  location     String?   // "Remote", "On-campus", specific location
+  duration     String?   // "1 month", "3 months", "Flexible"
+  compensation String?   // "Paid", "Unpaid", "$X/hr", "Equity"
+  requirements String[]  // Required skills/qualifications
+
+  // Status
+  status   PostStatus @default(ACTIVE)
+  isDraft  Boolean    @default(false)
+  isFilled Boolean    @default(false)
+
+  // Analytics
+  views             Int    @default(0)
+  applicationsCount Int    @default(0)
+  interestRate      Float? // Calculated field: applications/views ratio
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime?
+
+  // Relations
+  posterId     String
+  poster       User          @relation(fields: [posterId], references: [id], onDelete: Cascade)
+  applications Application[]
+  savedBy      SavedJob[]
+
+  @@index([posterId])
+  @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+  @@map("job_post")
+}
+
+// Application Model
+model Application {
+  id String @id @default(cuid())
+
+  // Application Content
+  coverLetter   String? @db.Text
+  resumeUrl     String?
+  customMessage String? @db.Text
+
+  // Status
+  status     ApplicationStatus @default(PENDING)
+  matchScore Int?              // 0-100 percentage match
+
+  // Timestamps
+  appliedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  jobPostId   String
+  jobPost     JobPost @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User    @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+
+  @@unique([jobPostId, applicantId]) // Prevent duplicate applications
+  @@index([applicantId])
+  @@index([jobPostId])
+  @@index([status])
+  @@map("application")
+}
+
+// Saved Jobs (Bookmarks)
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPostId String
+  jobPost   JobPost  @relation(fields: [jobPostId], references: [id], onDelete: Cascade)
+  savedAt   DateTime @default(now())
+
+  @@unique([userId, jobPostId])
+  @@index([userId])
+  @@map("saved_job")
+}
+
+// Conversation Model (for chat system)
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@map("conversation")
+}
+
+// Conversation Participants (many-to-many)
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime @default(now())
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participant")
+}
+
+// Message Model (for real-time chat)
+model Message {
+  id             String   @id @default(cuid())
+  content        String   @db.Text
+  createdAt      DateTime @default(now())
+  isRead         Boolean  @default(false)
+  conversationId String
+  senderId       String
+  receiverId     String
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@map("message")
+}
+
+// In-App Notification Model
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  isRead    Boolean          @default(false)
+  link      String?          // URL to redirect when clicked
+  metadata  Json?            // Additional data (e.g., jobId, applicationId)
+  createdAt DateTime         @default(now())
+  readAt    DateTime?        // When the notification was read
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notification")
+}
+
+// Enums
 enum UserRole {
   USER
   ADMIN
+}
+
+enum JobType {
+  ACADEMIC_PROJECT
+  STARTUP_COLLABORATION
+  PART_TIME_JOB
+  COMPETITION_HACKATHON
+  INTERNSHIP
+  FREELANCE
+}
+
+enum JobCategory {
+  DEVELOPMENT
+  DESIGN
+  MARKETING
+  SALES
+  CONTENT_WRITING
+  DATA_SCIENCE
+  RESEARCH
+  BUSINESS_DEVELOPMENT
+  PRODUCT_MANAGEMENT
+  CONSULTING
+  FINANCE
+  OPERATIONS
+  HUMAN_RESOURCES
+  CUSTOMER_SUPPORT
+  LEGAL
+  OTHER
+}
+
+enum PostStatus {
+  ACTIVE
+  DRAFT
+  CLOSED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  PENDING
+  SHORTLISTED
+  REJECTED
+  ACCEPTED
+}
+
+enum NotificationType {
+  APPLICATION_RECEIVED    // When someone applies to your job
+  APPLICATION_STATUS_CHANGED // When your application status changes
+  NEW_MESSAGE            // When you receive a new chat message
+  JOB_EXPIRED            // When your job post expires
+  JOB_FILLED             // When your job is marked as filled
+  NEW_RECOMMENDATION     // When there's a new recommended job
+  SHORTLISTED            // When you're shortlisted for a job
+  ACCEPTED               // When your application is accepted
+  REJECTED               // When your application is rejected
 }
