@@ -4,6 +4,7 @@ import { GlobeSection } from "@/components/sections/globe-section";
 import { FeaturesSection } from "@/components/sections/features-section";
 import { GeminiSection } from "@/components/sections/gemini-section";
 import { TestimonialsSection } from "@/components/sections/testimonials-section";
+import { FooterSection } from "@/components/sections/footer-section";
 
 export default function Home() {
   return (
@@ -50,6 +51,9 @@ export default function Home() {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Footer */}
+      <FooterSection />
     </>
   );
 }
