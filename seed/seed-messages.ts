@@ -255,7 +255,10 @@ Thank you for this opportunity!`,
 
   for (const msgData of messages) {
     await prisma.message.create({
-      data: msgData,
+      data: {
+        ...msgData,
+        conversationId: conversation.id,
+      },
     });
   }
 

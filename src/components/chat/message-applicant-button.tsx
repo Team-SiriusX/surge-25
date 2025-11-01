@@ -27,7 +27,7 @@ export function MessageApplicantButton({
 
     try {
       const result = await createConversation.mutateAsync({
-        otherUserId: applicantId,
+        receiverId: applicantId,
         jobPostId,
       });
 

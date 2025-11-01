@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 
 type CreateConversationInput = {
-  otherUserId: string;
+  receiverId: string;
   jobPostId?: string;
 };
 

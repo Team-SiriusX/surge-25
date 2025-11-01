@@ -4,6 +4,185 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { pusherServer } from "@/lib/pusher";
+import { ApplicationStatus, UserRole } from "@/types/models";
+
+const conversationListInclude = {
+  participants: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          email: true,
+        },
+      },
+    },
+  },
+  jobPost: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      poster: {
+        select: {
+          id: true,
+          name: true,
+          university: true,
+        },
+      },
+    },
+  },
+} as const;
+
+const conversationDetailInclude = {
+  ...conversationListInclude,
+  messages: {
+    orderBy: {
+      createdAt: "asc",
+    },
+    include: {
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          email: true,
+        },
+      },
+      receiver: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          email: true,
+        },
+      },
+    },
+  },
+} as const;
+
+const mapJobPostMeta = (jobPost: any) => {
+  if (!jobPost) return null;
+
+  const posterName = jobPost.poster?.name ?? null;
+  const posterUniversity = jobPost.poster?.university ?? null;
+
+  return {
+    id: jobPost.id,
+    title: jobPost.title,
+    description: jobPost.description ?? null,
+    companyName: posterName ?? posterUniversity ?? "Hiring Team",
+    poster: jobPost.poster
+      ? {
+          id: jobPost.poster.id,
+          name: posterName ?? "Hiring Team",
+          university: posterUniversity,
+        }
+      : null,
+  };
+};
+
+const getConversationApplication = async (
+  conversation: any,
+  currentUserId: string
+) => {
+  if (!conversation.jobPostId) return null;
+
+  const otherParticipant = conversation.participants?.find(
+    (participant: any) => participant.userId !== currentUserId
+  );
+
+  if (!otherParticipant) return null;
+
+  return db.application.findFirst({
+    where: {
+      jobPostId: conversation.jobPostId,
+      applicantId: otherParticipant.userId,
+    },
+    select: {
+      id: true,
+      status: true,
+      applicantId: true,
+      jobPostId: true,
+    },
+  });
+};
+
+const transformConversationForList = async (
+  conversation: any,
+  currentUserId: string
+) => {
+  const [lastMessage, unreadCount, application] = await Promise.all([
+    db.message.findFirst({
+      where: {
+        conversationId: conversation.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            email: true,
+          },
+        },
+      },
+    }),
+    db.message.count({
+      where: {
+        conversationId: conversation.id,
+        receiverId: currentUserId,
+        isRead: false,
+      },
+    }),
+    getConversationApplication(conversation, currentUserId),
+  ]);
+
+  const { jobPost, ...rest } = conversation;
+
+  return {
+    ...rest,
+    jobPost: mapJobPostMeta(jobPost),
+    lastMessage,
+    unreadCount,
+    application,
+  };
+};
+
+const transformConversationWithMessages = async (
+  conversation: any,
+  currentUserId: string
+) => {
+  const [application, unreadCount] = await Promise.all([
+    getConversationApplication(conversation, currentUserId),
+    db.message.count({
+      where: {
+        conversationId: conversation.id,
+        receiverId: currentUserId,
+        isRead: false,
+      },
+    }),
+  ]);
+
+  const messages = conversation.messages ?? [];
+  const lastMessage =
+    messages.length > 0 ? messages[messages.length - 1] : null;
+
+  const { jobPost, ...rest } = conversation;
+
+  return {
+    ...rest,
+    jobPost: mapJobPostMeta(jobPost),
+    messages,
+    lastMessage,
+    unreadCount,
+    application,
+  };
+};
 
 const app = new Hono()
   // Get all conversations for the current user
@@ -14,7 +193,7 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const conversations = await db.conversation.findMany({
+    const rawConversations = await db.conversation.findMany({
       where: {
         participants: {
           some: {
@@ -22,52 +201,32 @@ const app = new Hono()
           },
         },
       },
-      include: {
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                email: true,
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1, // Get last message
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-        jobPost: {
-          select: {
-            id: true,
-            title: true,
-            type: true,
-          },
-        },
-      },
+      include: conversationListInclude,
       orderBy: {
         updatedAt: "desc",
       },
     });
 
-    return c.json({ conversations });
+    const conversations = await Promise.all(
+      rawConversations.map((conversation) =>
+        transformConversationForList(conversation, session.user.id)
+      )
+    );
+
+    const filteredConversations =
+      session.user.role === UserRole.FINDER
+        ? conversations.filter((conversation) => {
+            if (!conversation.jobPostId) return true;
+            const status = conversation.application?.status;
+            return status === ApplicationStatus.SHORTLISTED;
+          })
+        : conversations;
+
+    return c.json({ conversations: filteredConversations });
   })
 
   // Get a specific conversation with all messages
-  .get("/:conversationId", async (c) => {
+  .get(":conversationId", async (c) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
     if (!session) {
@@ -76,65 +235,35 @@ const app = new Hono()
 
     const conversationId = c.req.param("conversationId");
 
-    const conversation = await db.conversation.findUnique({
+    const baseConversation = await db.conversation.findUnique({
       where: { id: conversationId },
       include: {
-        participants: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-        },
-        messages: {
-          orderBy: {
-            createdAt: "asc",
-          },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-            receiver: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-          },
-        },
-        jobPost: {
-          select: {
-            id: true,
-            title: true,
-            type: true,
-            description: true,
-          },
-        },
+        participants: true,
       },
     });
 
-    if (!conversation) {
+    if (!baseConversation) {
       return c.json({ error: "Conversation not found" }, 404);
     }
 
     // Check if user is a participant
-    const isParticipant = conversation.participants.some(
+    const isParticipant = baseConversation.participants.some(
       (p) => p.userId === session.user.id
     );
 
     if (!isParticipant) {
       return c.json({ error: "Not authorized to view this conversation" }, 403);
+    }
+
+    if (session.user.role === UserRole.FINDER && baseConversation.jobPostId) {
+      const application = await getConversationApplication(
+        baseConversation,
+        session.user.id
+      );
+
+      if (application?.status !== ApplicationStatus.SHORTLISTED) {
+        return c.json({ error: "Conversation not available" }, 403);
+      }
     }
 
     // Mark messages as read
@@ -160,7 +289,21 @@ const app = new Hono()
       },
     });
 
-    return c.json({ conversation });
+    const conversation = await db.conversation.findUnique({
+      where: { id: conversationId },
+      include: conversationDetailInclude,
+    });
+
+    if (!conversation) {
+      return c.json({ error: "Conversation not found" }, 404);
+    }
+
+    const transformedConversation = await transformConversationWithMessages(
+      conversation,
+      session.user.id
+    );
+
+    return c.json({ conversation: transformedConversation });
   })
 
   // Create or get a conversation (for finder to message applicant)
@@ -182,6 +325,37 @@ const app = new Hono()
 
       const { receiverId, jobPostId } = c.req.valid("json");
 
+      if (receiverId === session.user.id) {
+        return c.json({ error: "Cannot create a conversation with yourself" }, 400);
+      }
+
+      if (session.user.role === UserRole.FINDER) {
+        if (!jobPostId) {
+          return c.json({ error: "Job post is required to message applicants" }, 400);
+        }
+
+        const shortlistedApplication = await db.application.findFirst({
+          where: {
+            jobPostId,
+            applicantId: receiverId,
+            status: ApplicationStatus.SHORTLISTED,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!shortlistedApplication) {
+          return c.json(
+            {
+              error:
+                "You can only start conversations with shortlisted applicants for this job.",
+            },
+            403
+          );
+        }
+      }
+
       // Check if conversation already exists
       const existingConversation = await db.conversation.findFirst({
         where: {
@@ -200,77 +374,47 @@ const app = new Hono()
                 },
               },
             },
-            jobPostId ? { jobPostId } : {},
+            jobPostId ? { jobPostId } : { jobPostId: null },
           ],
         },
-        include: {
-          participants: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true,
-                  email: true,
-                },
-              },
-            },
-          },
-          jobPost: {
-            select: {
-              id: true,
-              title: true,
-              type: true,
-            },
-          },
-        },
+        include: conversationListInclude,
       });
 
       if (existingConversation) {
-        return c.json({ conversation: existingConversation });
+        const conversation = await transformConversationForList(
+          existingConversation,
+          session.user.id
+        );
+
+        return c.json({ conversation });
       }
 
       // Create new conversation
       const conversation = await db.conversation.create({
         data: {
-          jobPostId,
+          jobPostId: jobPostId ?? null,
           participants: {
             create: [
-              { userId: session.user.id },
+              { userId: session.user.id, lastReadAt: new Date() },
               { userId: receiverId },
             ],
           },
         },
-        include: {
-          participants: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true,
-                  email: true,
-                },
-              },
-            },
-          },
-          jobPost: {
-            select: {
-              id: true,
-              title: true,
-              type: true,
-            },
-          },
-        },
+        include: conversationListInclude,
       });
 
-      return c.json({ conversation });
+      const formattedConversation = await transformConversationForList(
+        conversation,
+        session.user.id
+      );
+
+      return c.json({ conversation: formattedConversation });
     }
   )
 
   // Send a message
   .post(
-    "/:conversationId/messages",
+    ":conversationId/messages",
     zValidator(
       "json",
       z.object({
@@ -307,6 +451,23 @@ const app = new Hono()
         return c.json({ error: "Not authorized to send messages" }, 403);
       }
 
+      if (session.user.role === UserRole.FINDER && conversation.jobPostId) {
+        const application = await getConversationApplication(
+          conversation,
+          session.user.id
+        );
+
+        if (application?.status !== ApplicationStatus.SHORTLISTED) {
+          return c.json(
+            {
+              error:
+                "You can only message shortlisted applicants for this job.",
+            },
+            403
+          );
+        }
+      }
+
       // Get receiver ID (the other participant)
       const receiverId = conversation.participants.find(
         (p) => p.userId !== session.user.id
@@ -330,6 +491,7 @@ const app = new Hono()
               id: true,
               name: true,
               image: true,
+              email: true,
             },
           },
           receiver: {
@@ -337,6 +499,7 @@ const app = new Hono()
               id: true,
               name: true,
               image: true,
+              email: true,
             },
           },
         },
@@ -370,7 +533,7 @@ const app = new Hono()
   )
 
   // Mark messages as read
-  .patch("/:conversationId/read", async (c) => {
+  .patch(":conversationId/read", async (c) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
     if (!session) {
