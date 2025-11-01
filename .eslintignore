@@ -1,0 +1,17 @@
+# Generated files
+src/generated/**
+**/prisma/runtime/**
+**/prisma/wasm.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Misc
+*.log
+.DS_Store

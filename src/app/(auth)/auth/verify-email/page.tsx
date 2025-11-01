@@ -2,15 +2,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
 	const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 	const [message, setMessage] = useState("");
-	const router = useRouter();
 	const searchParams = useSearchParams();
 
 	useEffect(() => {
@@ -100,5 +99,27 @@ export default function VerifyEmail() {
 				</div>
 			</CardContent>
 		</Card>
+	);
+}
+
+export default function VerifyEmail() {
+	return (
+		<Suspense fallback={
+			<Card className="z-50 rounded-md max-w-md">
+				<CardHeader>
+					<div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 mb-4 mx-auto">
+						<Loader2 className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" />
+					</div>
+					<CardTitle className="text-lg md:text-xl text-center">
+						Verifying your email...
+					</CardTitle>
+					<CardDescription className="text-xs md:text-sm text-center">
+						Please wait while we verify your email address
+					</CardDescription>
+				</CardHeader>
+			</Card>
+		}>
+			<VerifyEmailContent />
+		</Suspense>
 	);
 }

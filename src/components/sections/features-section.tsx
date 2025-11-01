@@ -227,7 +227,7 @@ export function FeaturesSection() {
                     className="mx-auto mt-16 max-w-2xl px-4 text-center"
                 >
                     <p className="text-base text-neutral-400 sm:text-lg">
-                        Whether you're looking to{" "}
+                        Whether you&apos;re looking to{" "}
                         <span className="font-semibold text-white">hire talent</span> or{" "}
                         <span className="font-semibold text-white">find opportunities</span>,
                         CampusConnect bridges the gap between ambition and achievement.

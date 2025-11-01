@@ -8,7 +8,6 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function SignIn() {
@@ -215,7 +214,7 @@ export default function SignIn() {
 
           {/* Footer */}
           <div className="pt-4 text-center text-sm text-neutral-400">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/sign-up"
               className="font-medium text-blue-400 transition-colors hover:text-blue-300"
