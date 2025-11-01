@@ -7,7 +7,7 @@ import { Briefcase, Search, ArrowRight, Sparkles } from "lucide-react";
 export default function DashboardPage() {
   const cards: Card[] = [
     {
-      title: "Job Finder",
+      title: "Talent Finder",
       src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1200&h=800&fit=crop",
       description: "Discover amazing opportunities and connect with talented students for your projects",
       href: "/finder",

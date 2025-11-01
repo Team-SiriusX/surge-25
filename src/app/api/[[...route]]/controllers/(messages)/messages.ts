@@ -1,10 +1,9 @@
-import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
-import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";
-import { ApplicationStatus } from "@/types/models";
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { z } from "zod";
 
 const conversationListInclude = {
   participants: {
@@ -122,7 +121,7 @@ const getConversationApplication = async (
   // If current user is the poster, get application for the other participant
   // If current user is not the poster, get their own application
   let applicantId: string;
-  
+
   if (jobPost.poster?.id === currentUserId) {
     // Current user is the poster, find the applicant
     const applicantParticipant = conversation.participants?.find(
@@ -346,7 +345,10 @@ const app = new Hono()
       const { receiverId, jobPostId } = c.req.valid("json");
 
       if (receiverId === session.user.id) {
-        return c.json({ error: "Cannot create a conversation with yourself" }, 400);
+        return c.json(
+          { error: "Cannot create a conversation with yourself" },
+          400
+        );
       }
 
       // Check if conversation already exists
@@ -412,6 +414,10 @@ const app = new Hono()
       "json",
       z.object({
         content: z.string().min(1),
+        attachmentUrl: z.string().optional(),
+        attachmentName: z.string().optional(),
+        attachmentType: z.string().optional(),
+        attachmentSize: z.number().optional(),
       })
     ),
     async (c) => {
@@ -422,7 +428,7 @@ const app = new Hono()
       }
 
       const conversationId = c.req.param("conversationId");
-      const { content } = c.req.valid("json");
+      const { content, attachmentUrl, attachmentName, attachmentType, attachmentSize } = c.req.valid("json");
 
       // Get conversation and verify user is a participant
       const conversation = await db.conversation.findUnique({
@@ -460,6 +466,10 @@ const app = new Hono()
           conversationId,
           senderId: session.user.id,
           receiverId,
+          attachmentUrl: attachmentUrl ?? null,
+          attachmentName: attachmentName ?? null,
+          attachmentType: attachmentType ?? null,
+          attachmentSize: attachmentSize ?? null,
         },
         include: {
           sender: {
@@ -545,3 +555,4 @@ const app = new Hono()
   });
 
 export { app as messages };
+

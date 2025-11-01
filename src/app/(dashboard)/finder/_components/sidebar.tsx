@@ -12,6 +12,7 @@ export function Sidebar() {
   const navItems = [
     { href: "/finder", label: "Dashboard", icon: LayoutDashboard },
     { href: "/finder/posts", label: "My Posts", icon: FileText },
+    {href: "/message" , label: "Messages", icon: MessageSquare },
   ]
 
   return (
@@ -56,7 +57,7 @@ export function Sidebar() {
             Switch to Seeker
           </Button>
         </Link>
-        <p className="text-xs text-white text-center">© 2025 Talent Finder</p>
+        <p className="text-xs text-white text-center">© 2025 Uni Connect</p>
       </div>
     </aside>
   )

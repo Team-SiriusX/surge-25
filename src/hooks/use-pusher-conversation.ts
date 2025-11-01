@@ -47,7 +47,7 @@ export function usePusherConversation(conversationId: string | null) {
 
     const channel = pusherClient.subscribe(`conversation-${conversationId}`);
 
-    channel.bind("new-message", (data: { message: Message }) => {
+    channel.bind("new-message", (message: Message) => {
       // Update conversation detail query with new message
       queryClient.setQueryData(
         queryKeys.conversations.detail(conversationId),
@@ -57,7 +57,7 @@ export function usePusherConversation(conversationId: string | null) {
             ...old,
             conversation: {
               ...old.conversation,
-              messages: [...old.conversation.messages, data.message],
+              messages: [...(old.conversation.messages || []), message],
               updatedAt: new Date().toISOString(),
             },
           };

@@ -11,6 +11,10 @@ type Message = {
   content: string;
   isRead: boolean;
   createdAt: string;
+  attachmentUrl?: string | null;
+  attachmentName?: string | null;
+  attachmentType?: string | null;
+  attachmentSize?: number | null;
   sender: {
     id: string;
     name: string;

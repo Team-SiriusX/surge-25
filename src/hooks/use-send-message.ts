@@ -6,6 +6,10 @@ import { queryKeys } from "@/constants/query-keys";
 type SendMessageInput = {
   conversationId: string;
   content: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
 };
 
 type MessageResponse = {
@@ -17,6 +21,10 @@ type MessageResponse = {
     content: string;
     isRead: boolean;
     createdAt: string;
+    attachmentUrl?: string | null;
+    attachmentName?: string | null;
+    attachmentType?: string | null;
+    attachmentSize?: number | null;
     sender: {
       id: string;
       name: string;
@@ -36,13 +44,19 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation<MessageResponse, Error, SendMessageInput>({
-    mutationFn: async ({ conversationId, content }) => {
+    mutationFn: async ({ conversationId, content, attachmentUrl, attachmentName, attachmentType, attachmentSize }) => {
       const res = await fetch(`/api/messages/${conversationId}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ 
+          content,
+          attachmentUrl,
+          attachmentName,
+          attachmentType,
+          attachmentSize,
+        }),
       });
 
       if (!res.ok) {
