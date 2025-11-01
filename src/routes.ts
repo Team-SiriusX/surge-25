@@ -1,4 +1,10 @@
-export const authRoutes = ["/auth/sign-in", "/auth/sign-up"];
+export const authRoutes = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/forget-password",
+  "/auth/reset-password",
+  "/auth/verify-email",
+];
 
 export const publicRoutes = ["/" , "/sample" , "/finder","/finder/*"];
 
