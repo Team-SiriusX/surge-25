@@ -415,96 +415,147 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const session = await auth.api.getSession({ headers: c.req.raw.headers });
+      try {
+        const session = await auth.api.getSession({
+          headers: c.req.raw.headers,
+        });
 
-      if (!session) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+        console.log("Send message - Session:", session?.user.id);
 
-      const conversationId = c.req.param("conversationId");
-      const { content } = c.req.valid("json");
-
-      // Get conversation and verify user is a participant
-      const conversation = await db.conversation.findUnique({
-        where: { id: conversationId },
-        include: {
-          participants: true,
-        },
-      });
-
-      if (!conversation) {
-        return c.json({ error: "Conversation not found" }, 404);
-      }
-
-      const isParticipant = conversation.participants.some(
-        (p) => p.userId === session.user.id
-      );
-
-      if (!isParticipant) {
-        return c.json({ error: "Not authorized to send messages" }, 403);
-      }
-
-      // Get receiver ID (the other participant)
-      const receiverId = conversation.participants.find(
-        (p) => p.userId !== session.user.id
-      )?.userId;
-
-      if (!receiverId) {
-        return c.json({ error: "Receiver not found" }, 404);
-      }
-
-      // Create message
-      const message = await db.message.create({
-        data: {
-          content,
-          conversationId,
-          senderId: session.user.id,
-          receiverId,
-        },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              email: true,
-            },
-          },
-          receiver: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              email: true,
-            },
-          },
-        },
-      });
-
-      // Update conversation timestamp
-      await db.conversation.update({
-        where: { id: conversationId },
-        data: { updatedAt: new Date() },
-      });
-
-      // Trigger Pusher event for real-time delivery
-      await pusherServer.trigger(
-        `conversation-${conversationId}`,
-        "new-message",
-        message
-      );
-
-      // Trigger notification for receiver
-      await pusherServer.trigger(
-        `user-${receiverId}`,
-        "new-message-notification",
-        {
-          conversationId,
-          message,
+        if (!session) {
+          return c.json({ error: "Unauthorized" }, 401);
         }
-      );
 
-      return c.json({ message });
+        const conversationId = c.req.param("conversationId");
+        const { content } = c.req.valid("json");
+
+        console.log("Send message - ConversationId:", conversationId);
+        console.log("Send message - Content length:", content.length);
+
+        // Get conversation and verify user is a participant
+        const conversation = await db.conversation.findUnique({
+          where: { id: conversationId },
+          include: {
+            participants: true,
+          },
+        });
+
+        console.log("Send message - Conversation found:", !!conversation);
+        console.log(
+          "Send message - Participants:",
+          conversation?.participants.map((p) => p.userId)
+        );
+
+        if (!conversation) {
+          return c.json({ error: "Conversation not found" }, 404);
+        }
+
+        const isParticipant = conversation.participants.some(
+          (p) => p.userId === session.user.id
+        );
+
+        console.log("Send message - Is participant:", isParticipant);
+
+        if (!isParticipant) {
+          return c.json({ error: "Not authorized to send messages" }, 403);
+        }
+
+        // Get receiver ID (the other participant)
+        const receiverId = conversation.participants.find(
+          (p) => p.userId !== session.user.id
+        )?.userId;
+
+        console.log("Send message - Receiver ID:", receiverId);
+
+        if (!receiverId) {
+          return c.json({ error: "Receiver not found" }, 404);
+        }
+
+        // Create message
+        console.log("Send message - Creating message...");
+        const message = await db.message.create({
+          data: {
+            content,
+            conversationId,
+            senderId: session.user.id,
+            receiverId,
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                email: true,
+              },
+            },
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        console.log("Send message - Message created:", message.id);
+
+        // Update conversation timestamp
+        await db.conversation.update({
+          where: { id: conversationId },
+          data: { updatedAt: new Date() },
+        });
+
+        // Create notification for receiver
+        await db.notification.create({
+          data: {
+            userId: receiverId,
+            type: "NEW_MESSAGE",
+            title: "New Message",
+            message: `${message.sender.name || "Someone"} sent you a message`,
+            link: `/finder/messages?conversation=${conversationId}`,
+            metadata: {
+              conversationId,
+              messageId: message.id,
+              senderId: session.user.id,
+            },
+          },
+        });
+
+        console.log("Send message - Triggering Pusher events...");
+
+        // Trigger Pusher event for real-time delivery
+        await pusherServer.trigger(
+          `conversation-${conversationId}`,
+          "new-message",
+          message
+        );
+
+        // Trigger notification for receiver
+        await pusherServer.trigger(
+          `user-${receiverId}`,
+          "new-message-notification",
+          {
+            conversationId,
+            message,
+          }
+        );
+
+        console.log("Send message - Success!");
+
+        return c.json({ message });
+      } catch (error) {
+        console.error("Send message - Error:", error);
+        return c.json(
+          {
+            error: "Internal server error",
+            details: error instanceof Error ? error.message : "Unknown error",
+          },
+          500
+        );
+      }
     }
   )
 

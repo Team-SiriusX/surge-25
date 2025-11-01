@@ -4,6 +4,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { $Enums } from "@/generated/prisma";
 import { currentUser } from "@/lib/current-user";
+import { pusherServer } from "@/lib/pusher";
 
 /**
  * Calculate match score between a job post and user profile
@@ -788,7 +789,7 @@ const app = new Hono()
             type: "APPLICATION_RECEIVED",
             title: "New Application Received",
             message: `${user.name || "A student"} applied for "${job.title}"`,
-            link: `/finder/applications/${application.id}`,
+            link: `/finder/posts/${jobPostId}/applicants/${application.id}`,
             metadata: {
               applicationId: application.id,
               jobPostId,
@@ -796,6 +797,17 @@ const app = new Hono()
             },
           },
         });
+
+        // Trigger real-time notification via Pusher
+        await pusherServer.trigger(
+          `user-${job.posterId}`,
+          "new-notification",
+          {
+            type: "APPLICATION_RECEIVED",
+            title: "New Application Received",
+            message: `${user.name || "A student"} applied for "${job.title}"`,
+          }
+        );
 
         return c.json({
           data: application,

@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Bell, Settings, ArrowLeft, User, LogOut } from "lucide-react"
+import { Search, Settings, ArrowLeft, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
 import { useSession, signOut } from "@/lib/auth-client"
+import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown"
 
 export function Header() {
   const router = useRouter();
@@ -42,9 +43,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4 ml-6">
-        <Button variant="ghost" size="icon">
-          <Bell className="w-5 h-5" />
-        </Button>
+        <NotificationsDropdown />
         <Button variant="ghost" size="icon">
           <Settings className="w-5 h-5" />
         </Button>

@@ -29,7 +29,7 @@ export function SeekerMessagesContent({ userId }: SeekerMessagesContentProps) {
   }, [searchParams]);
 
   return (
-    <div className="container mx-auto h-[calc(100vh-4rem)] py-6">
+    <div className="container mx-auto py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Messages</h1>
         <p className="text-muted-foreground">
@@ -37,7 +37,7 @@ export function SeekerMessagesContent({ userId }: SeekerMessagesContentProps) {
         </p>
       </div>
 
-      <div className="grid h-[calc(100%-6rem)] grid-cols-12 gap-6 overflow-hidden rounded-lg border">
+      <div className="grid h-[calc(100vh-12rem)] grid-cols-12 gap-6 overflow-hidden rounded-lg border">
         <div className="col-span-4 border-r">
           <ConversationList
             currentUserId={userId}
@@ -45,7 +45,7 @@ export function SeekerMessagesContent({ userId }: SeekerMessagesContentProps) {
             onSelectConversation={setSelectedConversationId}
           />
         </div>
-        <div className="col-span-8">
+        <div className="col-span-8 h-full">
           {selectedConversationId ? (
             <ChatInterface
               conversationId={selectedConversationId}
