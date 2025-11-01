@@ -24,12 +24,14 @@ export const Navbar = ({ children, className }: { children: React.ReactNode; cla
       animate={{
         paddingTop: isScrolled ? "0.75rem" : "1.5rem",
         paddingBottom: isScrolled ? "0.75rem" : "1.5rem",
+        paddingLeft: isScrolled ? "2rem" : "1rem",
+        paddingRight: isScrolled ? "2rem" : "1rem",
       }}
       transition={{
         duration: 0.3,
         ease: [0.25, 0.1, 0.25, 1],
       }}
-      className={cn("fixed top-0 left-0 right-0 z-50 px-4", className)}
+      className={cn("fixed top-0 left-0 right-0 z-50", className)}
     >
       <div className="mx-auto max-w-7xl">
         {children}
@@ -50,9 +52,11 @@ export const NavBody = ({ children, className }: { children: React.ReactNode; cl
     <motion.div
       animate={{
         height: isScrolled ? "3.25rem" : "5rem",
-        paddingLeft: isScrolled ? "1.5rem" : "2rem",
-        paddingRight: isScrolled ? "1.5rem" : "2rem",
+        paddingLeft: isScrolled ? "2rem" : "2rem",
+        paddingRight: isScrolled ? "2rem" : "2rem",
         borderRadius: isScrolled ? "0.75rem" : "1rem",
+        marginLeft: isScrolled ? "1.5rem" : "0rem",
+        marginRight: isScrolled ? "1.5rem" : "0rem",
       }}
       transition={{
         duration: 0.3,
@@ -240,13 +244,30 @@ export const MobileNav = ({ children, className }: { children: React.ReactNode; 
 };
 
 export const MobileNavHeader = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+  const { scrollY } = useScroll();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 20);
+  });
+
   return (
-    <div className={cn(
-      "flex items-center justify-between rounded-2xl border border-neutral-800 bg-black/40 px-4 py-3 shadow-2xl backdrop-blur-xl",
-      className
-    )}>
+    <motion.div 
+      animate={{
+        marginLeft: isScrolled ? "1rem" : "0rem",
+        marginRight: isScrolled ? "1rem" : "0rem",
+      }}
+      transition={{
+        duration: 0.3,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+      className={cn(
+        "flex items-center justify-between rounded-2xl border border-neutral-800 bg-black/40 px-4 py-3 shadow-2xl backdrop-blur-xl",
+        className
+      )}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 };
 
