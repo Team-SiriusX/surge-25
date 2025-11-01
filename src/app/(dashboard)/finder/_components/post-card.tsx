@@ -65,7 +65,7 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
           </Badge>
           <Button
             size="sm"
-            className="bg-polynesian_blue hover:bg-polynesian_blue/90"
+            className="bg-primary hover:bg-primary/90"
             onClick={(e) => {
               e.stopPropagation()
               router.push(`/finder/posts/${post.id}`)

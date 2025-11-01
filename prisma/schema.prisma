@@ -148,7 +148,7 @@ model Application {
   id String @id @default(cuid())
 
   // Application Content
-  coverLetter   String? @db.Text
+  coverLetter   String @db.Text
   resumeUrl     String?
   customMessage String? @db.Text
 
