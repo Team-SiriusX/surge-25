@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,12 @@ import { toast } from "sonner";
 import { Loader2, X, Plus, Github, Linkedin, Globe, GraduationCap, Phone, Mail, FileText, User, Calendar, Book, Target, Heart, Link as LinkIcon, CheckCircle2, Edit3, Save, TrendingUp, Award } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UploadButton } from "@/lib/uploadthing";
+
+// Dynamic import for AI insights component
+const ProfileAIInsights = dynamic(
+  () => import("@/app/profile/_components/profile-ai-insights").then((mod) => ({ default: mod.ProfileAIInsights })),
+  { ssr: false }
+);
 
 interface UserProfile {
   id: string;
@@ -567,6 +574,11 @@ export default function ProfilePage() {
             100% { transform: translateX(100%); }
           }
         `}</style>
+
+        {/* AI Profile Insights */}
+        <div className="mb-6">
+          <ProfileAIInsights />
+        </div>
 
         {/* Personal Information */}
         <Card className="mb-6 border-border/50 bg-card/50 backdrop-blur-sm">

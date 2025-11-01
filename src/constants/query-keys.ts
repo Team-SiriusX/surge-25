@@ -14,6 +14,7 @@ export const enum QUERY_KEYS {
   MESSAGES = "messages",
   SEEKER_APPLICATIONS = "seeker-applications",
   SEEKER_APPLICATION = "seeker-application",
+  PROFILE_CHAT = "profile-chat",
 }
 
 export const queryKeys = {
