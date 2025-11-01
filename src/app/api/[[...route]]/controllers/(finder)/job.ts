@@ -3,9 +3,10 @@ import { zValidator } from "@hono/zod-validator";
 import * as z from "zod";
 import { db } from "@/lib/db";
 import { $Enums } from "@/generated/prisma";
+import { currentUser } from "@/lib/current-user";
 
 const app = new Hono()
-  // Get all job posts with optional filters
+  // Get all job posts created by current user with optional filters
   .get(
     "/",
     zValidator(
@@ -14,7 +15,6 @@ const app = new Hono()
         type: z.nativeEnum($Enums.JobType).optional(),
         category: z.nativeEnum($Enums.JobCategory).optional(),
         status: z.nativeEnum($Enums.PostStatus).optional(),
-        posterId: z.string().optional(),
         location: z.string().optional(),
         isDraft: z
           .string()
@@ -36,11 +36,16 @@ const app = new Hono()
     ),
     async (c) => {
       try {
+        // Get current user
+        const user = await currentUser();
+        if (!user) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
+
         const {
           type,
           category,
           status,
-          posterId,
           location,
           isDraft,
           isFilled,
@@ -50,11 +55,11 @@ const app = new Hono()
 
         const skip = (page - 1) * limit;
 
-        const where: any = {};
+        // Always filter by current user's posts
+        const where: any = { posterId: user.id };
         if (type) where.type = type;
         if (category) where.category = category;
         if (status) where.status = status;
-        if (posterId) where.posterId = posterId;
         if (location)
           where.location = { contains: location, mode: "insensitive" };
         if (isDraft !== undefined) where.isDraft = isDraft;
@@ -193,16 +198,22 @@ const app = new Hono()
         status: z.nativeEnum($Enums.PostStatus).default("ACTIVE"),
         isDraft: z.boolean().default(false),
         expiresAt: z.string().datetime().optional(),
-        posterId: z.string().min(1, "Poster ID is required"),
       })
     ),
     async (c) => {
       try {
+        // Get current user
+        const user = await currentUser();
+        if (!user) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
+
         const data = c.req.valid("json");
 
         const job = await db.jobPost.create({
           data: {
             ...data,
+            posterId: user.id, // Use current user's ID
             expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
           },
           include: {
@@ -259,6 +270,12 @@ const app = new Hono()
     ),
     async (c) => {
       try {
+        // Get current user
+        const user = await currentUser();
+        if (!user) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
+
         const { id } = c.req.valid("param");
         const data = c.req.valid("json");
 
@@ -269,6 +286,14 @@ const app = new Hono()
 
         if (!existingJob) {
           return c.json({ message: "Job not found" }, 404);
+        }
+
+        // Check if the current user is the owner of the job post
+        if (existingJob.posterId !== user.id) {
+          return c.json(
+            { message: "Forbidden: You can only update your own posts" },
+            403
+          );
         }
 
         const updatedJob = await db.jobPost.update({
@@ -315,6 +340,12 @@ const app = new Hono()
     ),
     async (c) => {
       try {
+        // Get current user
+        const user = await currentUser();
+        if (!user) {
+          return c.json({ message: "Unauthorized" }, 401);
+        }
+
         const { id } = c.req.valid("param");
 
         // Check if job exists
@@ -324,6 +355,14 @@ const app = new Hono()
 
         if (!existingJob) {
           return c.json({ message: "Job not found" }, 404);
+        }
+
+        // Check if the current user is the owner of the job post
+        if (existingJob.posterId !== user.id) {
+          return c.json(
+            { message: "Forbidden: You can only delete your own posts" },
+            403
+          );
         }
 
         await db.jobPost.delete({

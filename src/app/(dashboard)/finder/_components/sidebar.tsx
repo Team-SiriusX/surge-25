@@ -1,20 +1,17 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { LayoutDashboard, FileText, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type NavigationItem = "dashboard" | "posts" | "messages"
+export function Sidebar() {
+  const pathname = usePathname()
 
-interface SidebarProps {
-  activeNav: NavigationItem
-  onNavigate: (item: NavigationItem) => void
-}
-
-export function Sidebar({ activeNav, onNavigate }: SidebarProps) {
   const navItems = [
-    { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-    { id: "posts" as const, label: "My Posts", icon: FileText },
-    { id: "messages" as const, label: "Messages", icon: MessageSquare },
+    { href: "/finder", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/finder/posts", label: "My Posts", icon: FileText },
+    { href: "/finder/messages", label: "Messages", icon: MessageSquare },
   ]
 
   return (
@@ -29,11 +26,11 @@ export function Sidebar({ activeNav, onNavigate }: SidebarProps) {
       <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = activeNav === item.id
+          const isActive = pathname === item.href
           return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
+            <Link
+              key={item.href}
+              href={item.href}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left",
                 isActive
@@ -43,7 +40,7 @@ export function Sidebar({ activeNav, onNavigate }: SidebarProps) {
             >
               <Icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
-            </button>
+            </Link>
           )
         })}
       </nav>

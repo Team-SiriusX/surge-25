@@ -24,21 +24,18 @@ const pickRandom = <T>(arr: T[], count: number): T[] => {
 };
 
 async function main() {
-  console.log("🌱 Starting database seed...");
+  // Get userId from command line arguments
+  const userId = "C3gAumlIn5aiRCitoVNeZRvC9GZbADpp";
 
-  // Clear existing data
-  console.log("🧹 Cleaning existing data...");
-  await prisma.notification.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.conversationParticipant.deleteMany();
-  await prisma.conversation.deleteMany();
-  await prisma.savedJob.deleteMany();
-  await prisma.application.deleteMany();
-  await prisma.jobPost.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.verification.deleteMany();
-  await prisma.user.deleteMany();
+  console.log("🌱 Starting database seed...");
+  if (userId) {
+    console.log(`📌 Seeding data for user ID: ${userId}`);
+  }
+
+  // Skip database cleaning to preserve existing data
+  console.log(
+    "⏭️  Skipping database cleanup - existing data will be preserved"
+  );
 
   // Sample data arrays
   const skills = [
@@ -126,6 +123,23 @@ async function main() {
 
   // Create Users
   console.log("👥 Creating users...");
+
+  let targetUser: any = null;
+
+  // If userId is provided, verify it exists
+  if (userId) {
+    targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      console.error(`❌ User with ID ${userId} not found!`);
+      process.exit(1);
+    }
+
+    console.log(`✅ Found user: ${targetUser.name} (${targetUser.email})`);
+  }
+
   const users = await Promise.all([
     // Admin user
     prisma.user.create({
@@ -157,12 +171,11 @@ async function main() {
           interests: pickRandom(interests, Math.floor(Math.random() * 6) + 2),
           resume: i % 2 === 0 ? `https://example.com/resume${i + 1}.pdf` : null,
           phone: i % 3 === 0 ? `+1-555-${1000 + i}` : null,
-          linkedIn:
-            i % 2 === 0 ? `https://linkedin.com/in/user${i + 1}` : null,
+          linkedIn: i % 2 === 0 ? `https://linkedin.com/in/user${i + 1}` : null,
           github: i % 2 === 0 ? `https://github.com/user${i + 1}` : null,
-          portfolio:
-            i % 3 === 0 ? `https://portfolio-user${i + 1}.com` : null,
-          university: universities[Math.floor(Math.random() * universities.length)],
+          portfolio: i % 3 === 0 ? `https://portfolio-user${i + 1}.com` : null,
+          university:
+            universities[Math.floor(Math.random() * universities.length)],
           major: majors[Math.floor(Math.random() * majors.length)],
           graduationYear: 2024 + Math.floor(Math.random() * 4),
           profileScore: Math.floor(Math.random() * 40) + 60,
@@ -258,10 +271,17 @@ async function main() {
   const jobCategories = Object.values(JobCategory);
 
   for (let i = 0; i < 50; i++) {
-    const type = jobTypes[Math.floor(Math.random() * jobTypes.length)] as JobType;
-    const category =
-      jobCategories[Math.floor(Math.random() * jobCategories.length)] as JobCategory;
-    const poster = users[Math.floor(Math.random() * (users.length - 10)) + 1]; // Avoid admin
+    const type = jobTypes[
+      Math.floor(Math.random() * jobTypes.length)
+    ] as JobType;
+    const category = jobCategories[
+      Math.floor(Math.random() * jobCategories.length)
+    ] as JobCategory;
+
+    // If userId provided, make this user the poster for all jobs
+    // Otherwise, randomly select a poster from the created users
+    const poster =
+      targetUser || users[Math.floor(Math.random() * (users.length - 10)) + 1]; // Avoid admin
 
     const titles = jobTitles[type];
     const descriptions = jobDescriptions[type];
@@ -289,7 +309,11 @@ async function main() {
               ? "Remote"
               : Math.random() > 0.5
               ? "On-campus"
-              : `${["New York", "San Francisco", "Boston", "Seattle", "Austin"][Math.floor(Math.random() * 5)]}`,
+              : `${
+                  ["New York", "San Francisco", "Boston", "Seattle", "Austin"][
+                    Math.floor(Math.random() * 5)
+                  ]
+                }`,
           duration:
             type === JobType.INTERNSHIP
               ? `${[3, 6, 12][Math.floor(Math.random() * 3)]} months`
@@ -302,7 +326,9 @@ async function main() {
             type === JobType.INTERNSHIP || type === JobType.PART_TIME_JOB
               ? `$${[15, 20, 25, 30][Math.floor(Math.random() * 4)]}/hr`
               : type === JobType.FREELANCE
-              ? `$${[500, 1000, 2000, 3000][Math.floor(Math.random() * 4)]} project`
+              ? `$${
+                  [500, 1000, 2000, 3000][Math.floor(Math.random() * 4)]
+                } project`
               : type === JobType.STARTUP_COLLABORATION
               ? "Equity + Stipend"
               : Math.random() > 0.5
@@ -335,7 +361,11 @@ async function main() {
 
   for (let i = 0; i < 100; i++) {
     const job = activeJobs[Math.floor(Math.random() * activeJobs.length)];
-    const applicant = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+
+    // If userId provided, make this user the applicant for all applications
+    // Otherwise, randomly select an applicant from the created users
+    const applicant =
+      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
 
     // Skip if user is the poster or application already exists
     if (applicant.id === job.posterId) continue;
@@ -357,7 +387,13 @@ async function main() {
           data: {
             jobPostId: job.id,
             applicantId: applicant.id,
-            coverLetter: `I am very interested in this opportunity. With my background in ${applicant.major} and skills in ${applicant.skills.slice(0, 3).join(", ")}, I believe I would be a great fit for this position.`,
+            coverLetter: `I am very interested in this opportunity. With my background in ${
+              applicant.major
+            } and skills in ${applicant.skills
+              .slice(0, 3)
+              .join(
+                ", "
+              )}, I believe I would be a great fit for this position.`,
             resumeUrl: applicant.resume,
             customMessage:
               Math.random() > 0.5
@@ -384,7 +420,11 @@ async function main() {
 
   for (let i = 0; i < 80; i++) {
     const job = jobPosts[Math.floor(Math.random() * jobPosts.length)];
-    const user = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+
+    // If userId provided, make this user save all jobs
+    // Otherwise, randomly select a user from the created users
+    const user =
+      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
 
     // Skip if user is the poster
     if (user.id === job.posterId) continue;
@@ -413,17 +453,34 @@ async function main() {
   const messages: any[] = [];
 
   for (let i = 0; i < 30; i++) {
-    const user1 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
-    const user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+    // If userId provided, make this user part of all conversations
+    // Otherwise, create conversations between random users
+    let user1: any, user2: any;
 
-    if (user1.id === user2.id) continue;
+    if (targetUser) {
+      user1 = targetUser;
+      user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+
+      // Ensure user2 is not the same as user1
+      while (user2.id === user1.id) {
+        user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+      }
+    } else {
+      user1 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+      user2 = users[Math.floor(Math.random() * (users.length - 5)) + 1];
+
+      if (user1.id === user2.id) continue;
+    }
 
     const conversation = await prisma.conversation.create({
       data: {
         participants: {
           create: [
             { userId: user1.id, lastReadAt: new Date() },
-            { userId: user2.id, lastReadAt: randomDate(new Date(2024, 10, 1), new Date()) },
+            {
+              userId: user2.id,
+              lastReadAt: randomDate(new Date(2024, 10, 1), new Date()),
+            },
           ],
         },
       },
@@ -471,19 +528,29 @@ async function main() {
     }
   }
 
-  console.log(`✅ Created ${conversations.length} conversations with ${messages.length} messages`);
+  console.log(
+    `✅ Created ${conversations.length} conversations with ${messages.length} messages`
+  );
 
   // Create Notifications
   console.log("🔔 Creating notifications...");
   const notifications: any[] = [];
 
   for (let i = 0; i < 100; i++) {
-    const user = users[Math.floor(Math.random() * (users.length - 5)) + 1];
-    const notificationTypes = Object.values(NotificationType);
-    const type =
-      notificationTypes[Math.floor(Math.random() * notificationTypes.length)] as NotificationType;
+    // If userId provided, create all notifications for this user
+    // Otherwise, randomly select a user from the created users
+    const user =
+      targetUser || users[Math.floor(Math.random() * (users.length - 5)) + 1];
 
-    const notificationData: Record<NotificationType, { title: string; message: string; link?: string }> = {
+    const notificationTypes = Object.values(NotificationType);
+    const type = notificationTypes[
+      Math.floor(Math.random() * notificationTypes.length)
+    ] as NotificationType;
+
+    const notificationData: Record<
+      NotificationType,
+      { title: string; message: string; link?: string }
+    > = {
       [NotificationType.APPLICATION_RECEIVED]: {
         title: "New Application Received",
         message: `You received a new application for your job posting "${jobPosts[0].title}"`,
@@ -556,6 +623,14 @@ async function main() {
   console.log(`✅ Created ${notifications.length} notifications`);
 
   console.log("\n🎉 Database seeding completed successfully!");
+
+  if (targetUser) {
+    console.log(
+      `\n✨ All data has been associated with user: ${targetUser.name} (${targetUser.email})`
+    );
+    console.log(`   User ID: ${targetUser.id}`);
+  }
+
   console.log("\n📊 Summary:");
   console.log(`   Users: ${users.length}`);
   console.log(`   Job Posts: ${jobPosts.length}`);
