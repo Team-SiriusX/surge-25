@@ -133,6 +133,7 @@ model JobPost {
   poster       User          @relation(fields: [posterId], references: [id], onDelete: Cascade)
   applications Application[]
   savedBy      SavedJob[]
+  conversations Conversation[] // Conversations related to this job post
 
   @@index([posterId])
   @@index([type])
@@ -189,13 +190,16 @@ model SavedJob {
 // Conversation Model (for chat system)
 model Conversation {
   id        String   @id @default(cuid())
+  jobPostId String? // Link conversation to a specific job post
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
+  jobPost      JobPost?                  @relation(fields: [jobPostId], references: [id], onDelete: SetNull)
   participants ConversationParticipant[]
   messages     Message[]
 
+  @@index([jobPostId])
   @@map("conversation")
 }
 

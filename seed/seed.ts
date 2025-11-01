@@ -495,24 +495,234 @@ async function main() {
   const conversations: any[] = [];
   const messages: any[] = [];
 
-  for (let i = 0; i < 30; i++) {
-    // Create diverse conversations
+  // Create conversations based on applications (realistic scenario)
+  const applicationsWithConversations = pickRandom(
+    applications,
+    Math.min(20, applications.length)
+  );
+
+  for (const application of applicationsWithConversations) {
+    const job = jobPosts.find((j) => j.id === application.jobPostId);
+    if (!job) continue;
+
+    const finder = users.find((u) => u.id === job.posterId);
+    const seeker = users.find((u) => u.id === application.applicantId);
+    if (!finder || !seeker) continue;
+
+    // Create conversation linked to job post
+    const conversation = await prisma.conversation.create({
+      data: {
+        jobPostId: job.id,
+        participants: {
+          create: [
+            { userId: finder.id, lastReadAt: new Date() },
+            {
+              userId: seeker.id,
+              lastReadAt: randomDate(new Date(2024, 10, 1), new Date()),
+            },
+          ],
+        },
+      },
+    });
+
+    conversations.push(conversation);
+
+    // Create realistic conversation flow
+    const conversationFlows = [
+      // Flow 1: Initial contact from finder
+      [
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Hi ${seeker.name}! I reviewed your application for ${job.title}. Your profile looks great! When would you be available for a quick chat?`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Hi ${finder.name}! Thank you for reaching out. I'm excited about this opportunity! I'm available most afternoons this week. Does Tuesday at 2 PM work for you?`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Tuesday at 2 PM works perfectly! I'll send you a meeting link. In the meantime, could you tell me a bit more about your experience with ${
+            job.requirements[0] || "the required skills"
+          }?`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Absolutely! I've been working with ${
+            job.requirements[0] || "those technologies"
+          } for about ${
+            Math.floor(Math.random() * 3) + 1
+          } years. I recently completed a project where...`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `That's impressive! Looking forward to our call on Tuesday. I'll share more details about the role and answer any questions you might have.`,
+        },
+      ],
+      // Flow 2: Follow-up after interview
+      [
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Hi! Thanks for taking the time to speak with me yesterday. I really enjoyed our conversation and learning more about your background.`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Thank you! I really enjoyed speaking with you as well. The project sounds fascinating and I'm very interested in moving forward.`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Great to hear! I'd like to move forward with your application. Are you available for a second round discussion next week?`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Definitely! I'm available Monday through Wednesday next week. What time works best for you?`,
+        },
+      ],
+      // Flow 3: Questions about the role
+      [
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Hi! I submitted an application for ${job.title}. I have a few questions about the role if you have a moment?`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Hi ${seeker.name}! Of course, I'd be happy to answer your questions. What would you like to know?`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Could you tell me more about the ${job.duration || "timeline"} and what the typical day-to-day responsibilities would be?`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Great question! ${
+            job.type === JobType.INTERNSHIP
+              ? "As an intern, you'd be working closely with our team on real projects. Typical day involves stand-ups, coding, and collaboration."
+              : job.type === JobType.STARTUP_COLLABORATION
+              ? "As part of our founding team, you'd have a lot of autonomy. We're building from scratch, so every day is different!"
+              : "The role is quite flexible. You'd be working on " +
+                job.category.toLowerCase() +
+                " projects with our team."
+          }`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `That sounds perfect! I'm really interested. When do you think you'll be making decisions on applications?`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `We're reviewing applications this week and will reach out to selected candidates by early next week. Your profile looks strong!`,
+        },
+      ],
+      // Flow 4: Accepted candidate
+      [
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Hi ${seeker.name}! I'm excited to share that we'd like to offer you the ${job.title} position! 🎉`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Wow, that's amazing news! Thank you so much! I'm thrilled and would love to accept!`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Fantastic! I'll send over the details and next steps via email. Welcome to the team!`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Thank you! I'm really looking forward to getting started. When would be a good time to discuss onboarding?`,
+        },
+      ],
+      // Flow 5: Quick questions
+      [
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Hi! Quick question about the ${job.title} position - is this role remote or on-site?`,
+        },
+        {
+          sender: finder,
+          receiver: seeker,
+          text: `Hi! It's ${
+            job.location === "Remote"
+              ? "fully remote"
+              : job.location === "On-campus"
+              ? "on-campus"
+              : "hybrid - " + job.location
+          }. Does that work for you?`,
+        },
+        {
+          sender: seeker,
+          receiver: finder,
+          text: `Perfect! That works great for me. I'm very interested in applying.`,
+        },
+      ],
+    ];
+
+    // Pick a random conversation flow
+    const flow =
+      conversationFlows[Math.floor(Math.random() * conversationFlows.length)];
+    let lastMessageTime = randomDate(application.appliedAt, new Date());
+
+    for (let i = 0; i < flow.length; i++) {
+      const messageData = flow[i];
+
+      // Add some time between messages (5 min to 2 hours)
+      lastMessageTime = new Date(
+        lastMessageTime.getTime() + (Math.random() * 7200000 + 300000)
+      );
+
+      messages.push(
+        await prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            senderId: messageData.sender.id,
+            receiverId: messageData.receiver.id,
+            content: messageData.text,
+            isRead: i < flow.length - 2 || Math.random() > 0.3, // Last 2 messages might be unread
+            createdAt: lastMessageTime,
+          },
+        })
+      );
+    }
+
+    // Update conversation timestamp
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: lastMessageTime },
+    });
+  }
+
+  // Also create some standalone conversations (not linked to jobs)
+  for (let i = 0; i < 10; i++) {
     let user1: any, user2: any;
 
-    if (targetUser && Math.random() > 0.3) {
-      // 70% chance target user is in conversation
+    if (targetUser && Math.random() > 0.5) {
       user1 = targetUser;
       user2 = users[Math.floor(Math.random() * users.length)];
-
-      // Ensure user2 is not the same as user1
       while (user2.id === user1.id) {
         user2 = users[Math.floor(Math.random() * users.length)];
       }
     } else {
-      // 30% chance create conversation between other users
       user1 = users[Math.floor(Math.random() * users.length)];
       user2 = users[Math.floor(Math.random() * users.length)];
-
       if (user1.id === user2.id) continue;
     }
 
@@ -532,26 +742,23 @@ async function main() {
 
     conversations.push(conversation);
 
-    // Create messages for this conversation
-    const messageCount = Math.floor(Math.random() * 10) + 2;
-    let lastMessageTime = randomDate(new Date(2024, 9, 1), new Date());
+    // Create a few messages
+    const messageCount = Math.floor(Math.random() * 5) + 2;
+    let lastMessageTime = randomDate(new Date(2024, 10, 1), new Date());
+
+    const casualMessages = [
+      "Hey! How's your semester going?",
+      "Pretty good! Working on some interesting projects. You?",
+      "Same here! Are you going to the hackathon next week?",
+      "Probably! Want to team up?",
+      "That would be great! Let's discuss ideas.",
+      "Sounds good! I'll send you what I've been thinking about.",
+      "Perfect! Looking forward to it.",
+    ];
 
     for (let j = 0; j < messageCount; j++) {
       const sender = j % 2 === 0 ? user1 : user2;
       const receiver = j % 2 === 0 ? user2 : user1;
-
-      const messageTexts = [
-        "Hi! I saw your job posting and I'm interested.",
-        "Thanks for reaching out! When would you be available for a call?",
-        "I'm free tomorrow afternoon. Does 2 PM work for you?",
-        "That works for me! I'll send you a meeting link.",
-        "Great! Looking forward to it.",
-        "Can you tell me more about the project requirements?",
-        "Sure! I'll send you the details.",
-        "Thanks! I'll review it and get back to you.",
-        "Sounds good. Let me know if you have any questions.",
-        "Will do! Thanks for the opportunity.",
-      ];
 
       lastMessageTime = new Date(
         lastMessageTime.getTime() + Math.random() * 3600000
@@ -563,13 +770,18 @@ async function main() {
             conversationId: conversation.id,
             senderId: sender.id,
             receiverId: receiver.id,
-            content: messageTexts[j % messageTexts.length],
+            content: casualMessages[j % casualMessages.length],
             isRead: Math.random() > 0.3,
             createdAt: lastMessageTime,
           },
         })
       );
     }
+
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: lastMessageTime },
+    });
   }
 
   console.log(

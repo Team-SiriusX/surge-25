@@ -9,7 +9,20 @@ export const enum QUERY_KEYS {
   SEEKER_JOBS = "seeker-jobs",
   SEEKER_JOB = "seeker-job",
   SEEKER_SAVED_JOBS = "seeker-saved-jobs",
+  CONVERSATIONS = "conversations",
+  CONVERSATION = "conversation",
+  MESSAGES = "messages",
   SEEKER_APPLICATIONS = "seeker-applications",
   SEEKER_APPLICATION = "seeker-application",
   PROFILE_CHAT = "profile-chat",
 }
+
+export const queryKeys = {
+  conversations: {
+    list: () => [QUERY_KEYS.CONVERSATIONS],
+    detail: (id: string) => [QUERY_KEYS.CONVERSATION, id],
+  },
+  messages: {
+    list: (conversationId: string) => [QUERY_KEYS.MESSAGES, conversationId],
+  },
+};
