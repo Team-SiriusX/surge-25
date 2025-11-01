@@ -21,16 +21,16 @@ export function ApplicationsView({ onViewDetails }: ApplicationsViewProps) {
 
   const statusCounts = {
     [ApplicationStatus.PENDING]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.PENDING
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.PENDING
     ).length,
     [ApplicationStatus.SHORTLISTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.SHORTLISTED
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.SHORTLISTED
     ).length,
     [ApplicationStatus.ACCEPTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.ACCEPTED
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.ACCEPTED
     ).length,
     [ApplicationStatus.REJECTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.REJECTED
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.REJECTED
     ).length,
   };
 

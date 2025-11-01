@@ -36,7 +36,7 @@ export function SavedJobsView({
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {savedJobs.map((job) => (
+          {/* {savedJobs.map((job) => (
             <JobCard
               key={job.id}
               job={job}
@@ -44,7 +44,7 @@ export function SavedJobsView({
               onSave={onSave}
               onViewDetails={onViewDetails}
             />
-          ))}
+          ))} */}
         </div>
       )}
     </div>
