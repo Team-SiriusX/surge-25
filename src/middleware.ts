@@ -7,6 +7,37 @@ import {
   SIGN_IN_PAGE_PATH,
 } from "./routes";
 
+/**
+ * Checks if a pathname matches a route pattern with wildcard support
+ * @param pathname - The current pathname to check
+ * @param pattern - The route pattern (can include wildcards like /finder/*)
+ * @returns boolean indicating if the pathname matches the pattern
+ */
+function matchesRoute(pathname: string, pattern: string): boolean {
+  // Exact match
+  if (pathname === pattern) {
+    return true;
+  }
+
+  // Wildcard match - convert pattern to regex
+  if (pattern.includes("*")) {
+    const regexPattern = pattern
+      .replace(/\*/g, ".*") // Replace * with .*
+      .replace(/\//g, "\\/"); // Escape forward slashes
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(pathname);
+  }
+
+  return false;
+}
+
+/**
+ * Checks if pathname matches any route in the array
+ */
+function matchesRoutes(pathname: string, routes: string[]): boolean {
+  return routes.some((route) => matchesRoute(pathname, route));
+}
+
 export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
 
@@ -15,8 +46,8 @@ export async function middleware(request: NextRequest) {
 
   const pathname = nextUrl.pathname;
 
-  const isAuthRoute = authRoutes.includes(pathname);
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const isAuthRoute = matchesRoutes(pathname, authRoutes);
+  const isPublicRoute = matchesRoutes(pathname, publicRoutes);
 
   const isApiRoute =
     pathname.startsWith("/api/") || pathname.startsWith("/trpc/");
