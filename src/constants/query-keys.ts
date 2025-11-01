@@ -11,4 +11,5 @@ export const enum QUERY_KEYS {
   SEEKER_SAVED_JOBS = "seeker-saved-jobs",
   SEEKER_APPLICATIONS = "seeker-applications",
   SEEKER_APPLICATION = "seeker-application",
+  PROFILE_CHAT = "profile-chat",
 }

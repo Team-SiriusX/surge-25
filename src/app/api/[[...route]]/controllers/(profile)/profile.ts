@@ -3,6 +3,8 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { GEMINI_CHAT_MODEL, GEMINI_CHAT_MODEL_CANDIDATES, streamGeminiChat } from "@/lib/ai/gemini-stream";
+import { streamText } from "hono/streaming";
 
 // Custom URL validator that allows empty strings
 const optionalUrl = z
@@ -217,6 +219,141 @@ const app = new Hono()
       });
 
       return c.json({ user: updatedUser, message: "Resume updated successfully" });
+    }
+  )
+
+  .post(
+    "/chat",
+    zValidator(
+      "json",
+      z.object({
+        messages: z.array(
+          z.object({
+            role: z.enum(["user", "assistant"]),
+            content: z.string(),
+          })
+        ),
+      })
+    ),
+    async (c) => {
+      const session = await auth.api.getSession({ headers: c.req.raw.headers });
+      if (!session) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const me = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          name: true,
+          bio: true,
+          skills: true,
+          interests: true,
+          resume: true,
+          linkedIn: true,
+          github: true,
+          portfolio: true,
+          university: true,
+          major: true,
+          graduationYear: true,
+        },
+      });
+
+      if (!me) {
+        return c.json({ error: "User not found" }, 404);
+      }
+
+      const { messages } = c.req.valid("json");
+
+      const sanitize = (s?: string | null) =>
+        (s || "")
+          .replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g, "[redacted]")
+          .replace(/\+?\d[\d\s-]{7,}\b/g, "[redacted]");
+
+      const skillsStr = Array.isArray(me.skills)
+        ? me.skills.join(", ")
+        : (me.skills as unknown as string) || "";
+      const interestsStr = Array.isArray(me.interests)
+        ? me.interests.join(", ")
+        : (me.interests as unknown as string) || "";
+
+      const systemInstruction = `You are an expert career advisor for a campus job marketplace called UniConnect.
+
+STUDENT PROFILE (PII sanitized):
+- Name: ${sanitize(me.name)}
+- Bio: ${sanitize(me.bio)}
+- Skills: ${sanitize(skillsStr)}
+- Interests: ${sanitize(interestsStr)}
+- Education: ${sanitize(me.major)} at ${sanitize(me.university)} (${me.graduationYear || "—"})
+- Links:
+  - GitHub: ${sanitize(me.github)}
+  - LinkedIn: ${sanitize(me.linkedIn)}
+  - Portfolio: ${sanitize(me.portfolio)}
+  - Resume: ${sanitize(me.resume)}
+
+YOUR ROLE:
+- Provide actionable, personalized career and profile advice
+- Be conversational, friendly, and encouraging
+- Ask clarifying questions when needed
+- Give specific, implementable suggestions
+- Focus on what the student can improve on their profile
+- Keep responses concise but insightful (2-4 paragraphs max)
+- Use markdown formatting for better readability
+
+GUIDELINES:
+- Only suggest changes they can make on their profile page
+- Be constructive and positive
+- Prioritize high-impact improvements
+- Tailor advice to their field of study and interests`;
+
+      try {
+        const candidates = [GEMINI_CHAT_MODEL, ...GEMINI_CHAT_MODEL_CANDIDATES];
+        let lastError: unknown = null;
+
+        for (const modelName of candidates) {
+          try {
+            const geminiStream = await streamGeminiChat({
+              model: modelName,
+              messages,
+              systemInstruction,
+            });
+
+            return streamText(c, async (stream) => {
+              const reader = geminiStream.getReader();
+              const decoder = new TextDecoder();
+
+              try {
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  await stream.write(decoder.decode(value, { stream: true }));
+                }
+              } catch (e) {
+                console.error("[chat] stream error", e);
+              }
+            });
+          } catch (e: any) {
+            lastError = e;
+            const status = e?.status;
+            const msg: string = e?.message || "";
+            const notFound = status === 404 || /not found|unsupported/i.test(msg);
+            console.warn(`[chat] model failed: ${modelName} (status: ${status}) ${msg}`);
+            if (!notFound) {
+              break;
+            }
+            continue;
+          }
+        }
+
+        console.error("/profile/chat error (all models failed)", lastError);
+        const message =
+          typeof (lastError as any)?.message === "string"
+            ? (lastError as any).message
+            : "AI chat unavailable. Please try again later.";
+        return c.json({ error: message }, 502);
+      } catch (err) {
+        console.error("/profile/chat error", err);
+        return c.json({ error: "Unable to process chat" }, 500);
+      }
     }
   );
 

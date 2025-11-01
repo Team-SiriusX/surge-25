@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
 interface NavItem {
@@ -126,27 +127,23 @@ export const NavbarLogo = ({ className }: { className?: string }) => {
     <Link href="/" className={cn("flex items-center gap-3", className)}>
       <motion.div
         animate={{
-          width: isScrolled ? "2.25rem" : "3rem",
-          height: isScrolled ? "2.25rem" : "3rem",
+          width: isScrolled ? "2rem" : "2.5rem",
+          height: isScrolled ? "2rem" : "2.5rem",
         }}
         transition={{
           duration: 0.3,
           ease: [0.25, 0.1, 0.25, 1],
         }}
-        className="flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30"
+        className="relative flex items-center justify-center"
       >
-        <motion.span
-          animate={{
-            fontSize: isScrolled ? "1rem" : "1.5rem",
-          }}
-          transition={{
-            duration: 0.3,
-            ease: [0.25, 0.1, 0.25, 1],
-          }}
-          className="font-bold text-white"
-        >
-          U
-        </motion.span>
+        <Image
+          src="/logo.svg"
+          alt="UniConnect Logo"
+          width={isScrolled ? 32 : 40}
+          height={isScrolled ? 32 : 40}
+          className="transition-all duration-300"
+          priority
+        />
       </motion.div>
       <motion.div
         animate={{
