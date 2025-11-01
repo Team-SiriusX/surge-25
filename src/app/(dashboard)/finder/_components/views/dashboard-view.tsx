@@ -20,115 +20,81 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Eye, Users, TrendingUp, Zap } from "lucide-react";
-import { useGetJobs, useGetApplications } from "../../_api";
+import { useGetDashboardStats } from "../../_api";
 import { useMemo } from "react";
 
+const CATEGORY_COLORS: Record<string, string> = {
+  ACADEMIC_PROJECT: "#0ea5e9",
+  PART_TIME_JOB: "#10b981",
+  STARTUP_COLLABORATION: "#8b5cf6",
+  COMPETITION_HACKATHON: "#f59e0b",
+  INTERNSHIP: "#ec4899",
+  FREELANCE: "#06b6d4",
+};
+
 export function DashboardView() {
-  const { data: jobsData, isLoading: jobsLoading } = useGetJobs();
-  const { data: applicationsData, isLoading: applicationsLoading } =
-    useGetApplications();
+  const { data, isLoading } = useGetDashboardStats();
 
-  const jobs = jobsData?.data || [];
-  const applications = applicationsData?.data || [];
+  const dashboardData = data?.data;
 
-  // Calculate stats
-  const stats = useMemo(() => {
-    const totalPosts = jobs.length;
-    const totalApplications = applications.length;
-    const totalViews = jobs.reduce((sum, job) => sum + (job.views || 0), 0);
-    const shortlisted = applications.filter(
-      (app) => app.status === "SHORTLISTED"
-    ).length;
-    const conversionRate =
-      totalApplications > 0
-        ? ((shortlisted / totalApplications) * 100).toFixed(1)
-        : 0;
-
-    return {
-      totalPosts,
-      totalApplications,
-      totalViews,
-      shortlisted,
-      conversionRate,
-    };
-  }, [jobs, applications]);
-
-  // Calculate category distribution
+  // Format category distribution for pie chart
   const categoryData = useMemo(() => {
-    const categories: Record<string, { count: number; color: string }> = {
-      ACADEMIC_PROJECT: { count: 0, color: "#0ea5e9" },
-      PART_TIME_JOB: { count: 0, color: "#10b981" },
-      STARTUP_COLLABORATION: { count: 0, color: "#8b5cf6" },
-      COMPETITION_HACKATHON: { count: 0, color: "#f59e0b" },
-      TEAM_SEARCH: { count: 0, color: "#ec4899" },
-    };
+    if (!dashboardData?.categoryDistribution) return [];
 
-    jobs.forEach((job) => {
-      if (categories[job.type]) {
-        categories[job.type].count++;
-      }
-    });
-
-    return Object.entries(categories)
-      .filter(([_, data]) => data.count > 0)
-      .map(([name, data]) => ({
+    return Object.entries(dashboardData.categoryDistribution)
+      .filter(([_, count]) => count > 0)
+      .map(([name, count]) => ({
         name: name
           .replace(/_/g, " ")
           .replace(/([A-Z])/g, " $1")
           .trim(),
-        value: data.count,
-        color: data.color,
+        value: count,
+        color: CATEGORY_COLORS[name] || "#6b7280",
       }));
-  }, [jobs]);
+  }, [dashboardData?.categoryDistribution]);
 
-  // Mock chart data - In a real app, you'd calculate this from historical data
-  const viewsChart = [
-    { name: "Mon", views: 120, applications: 24 },
-    { name: "Tue", views: 150, applications: 32 },
-    { name: "Wed", views: 200, applications: 45 },
-    { name: "Thu", views: 180, applications: 38 },
-    { name: "Fri", views: 250, applications: 52 },
-    { name: "Sat", views: 180, applications: 35 },
-    { name: "Sun", views: 140, applications: 28 },
-  ];
+  const dashboardStats = useMemo(() => {
+    if (!dashboardData) return [];
 
-  const dashboardStats = [
-    {
-      label: "Total Posts",
-      value: stats.totalPosts.toString(),
-      change: "+2 this month",
-      icon: Zap,
-      color: "#064789",
-    },
-    {
-      label: "Applications",
-      value: stats.totalApplications.toString(),
-      change: "+12 this week",
-      icon: Users,
-      color: "#427aa1",
-    },
-    {
-      label: "Total Views",
-      value:
-        stats.totalViews > 1000
-          ? `${(stats.totalViews / 1000).toFixed(1)}k`
-          : stats.totalViews.toString(),
-      change: "+380 today",
-      icon: Eye,
-      color: "#2b91f6",
-    },
-    {
-      label: "Shortlisted",
-      value: stats.shortlisted.toString(),
-      change: `${stats.conversionRate}% conversion`,
-      icon: TrendingUp,
-      color: "#10b981",
-    },
-  ];
+    const { stats, changes } = dashboardData;
 
-  if (jobsLoading || applicationsLoading) {
+    return [
+      {
+        label: "Total Posts",
+        value: stats.totalPosts.toString(),
+        change: `+${changes.postsThisMonth} this month`,
+        icon: Zap,
+        color: "#064789",
+      },
+      {
+        label: "Applications",
+        value: stats.totalApplications.toString(),
+        change: `+${changes.applicationsThisWeek} this week`,
+        icon: Users,
+        color: "#427aa1",
+      },
+      {
+        label: "Total Views",
+        value:
+          stats.totalViews > 1000
+            ? `${(stats.totalViews / 1000).toFixed(1)}k`
+            : stats.totalViews.toString(),
+        change: `+${changes.viewsToday} today`,
+        icon: Eye,
+        color: "#2b91f6",
+      },
+      {
+        label: "Shortlisted",
+        value: stats.shortlisted.toString(),
+        change: `${stats.conversionRate}% conversion`,
+        icon: TrendingUp,
+        color: "#10b981",
+      },
+    ];
+  }, [dashboardData]);
+
+  if (isLoading) {
     return (
       <div className="p-8 space-y-8">
         <div className="animate-pulse space-y-6">
@@ -143,6 +109,7 @@ export function DashboardView() {
       </div>
     );
   }
+
   return (
     <div className="p-8 space-y-8">
       {/* Welcome Section */}
@@ -192,7 +159,7 @@ export function DashboardView() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={viewsChart}>
+              <BarChart data={dashboardData?.viewsAndApplicationsTrend || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" stroke="var(--muted-foreground)" />
                 <YAxis stroke="var(--muted-foreground)" />

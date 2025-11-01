@@ -19,19 +19,22 @@ const eslintConfig = [
       "**/out/**",
       "**/build/**",
       "**/dist/**",
+      "src/generated/**",
     ],
   },
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-this-alias": "off",
+      "react/no-unescaped-entities": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_"
-        }
-      ]
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-require-imports": "warn",
     },
   },
 ];

@@ -6,10 +6,10 @@ import { toast } from "sonner";
 import { QUERY_KEYS } from "@/constants/query-keys";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.jobs)[":id"]["$patch"]
+  (typeof client.api.finder.jobs)[":id"]["$patch"]
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.jobs)[":id"]["$patch"]
+  (typeof client.api.finder.jobs)[":id"]["$patch"]
 >["json"];
 
 export const useUpdateJob = (id: string) => {
@@ -17,7 +17,7 @@ export const useUpdateJob = (id: string) => {
   
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
-      const response = await client.api.jobs[":id"].$patch({
+      const response = await client.api.finder.jobs[":id"].$patch({
         param: { id },
         json,
       });

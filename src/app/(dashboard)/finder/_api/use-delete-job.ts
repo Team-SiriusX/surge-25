@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { QUERY_KEYS } from "@/constants/query-keys";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.jobs)[":id"]["$delete"]
+  (typeof client.api.finder.jobs)[":id"]["$delete"]
 >;
 
 export const useDeleteJob = () => {
@@ -14,7 +14,7 @@ export const useDeleteJob = () => {
   
   const mutation = useMutation<ResponseType, Error, string>({
     mutationFn: async (id) => {
-      const response = await client.api.jobs[":id"].$delete({
+      const response = await client.api.finder.jobs[":id"].$delete({
         param: { id },
       });
 

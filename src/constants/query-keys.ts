@@ -5,4 +5,8 @@ export const enum QUERY_KEYS {
   FINDER_JOB = "finder-job",
   FINDER_APPLICATIONS = "finder-applications",
   FINDER_APPLICATION = "finder-application",
+  FINDER_DASHBOARD_STATS = "finder-dashboard-stats",
+  SEEKER_JOBS = "seeker-jobs",
+  SEEKER_JOB = "seeker-job",
+  SEEKER_SAVED_JOBS = "seeker-saved-jobs",
 }
