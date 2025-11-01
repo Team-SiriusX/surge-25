@@ -2,7 +2,8 @@
 
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@uploadthing/react/styles.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* Custom theme colors from polynesian_blue, ucla_blue, and alice_blue */
@@ -83,7 +84,7 @@
   --sidebar-ring: #72b6f9;
 }
 
-* {
+@theme inline {
   --font-sans: "Geist", "Geist Fallback";
   --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
@@ -127,21 +128,23 @@
   --color-category-job: var(--category-job);
   --color-category-competition: var(--category-competition);
   --color-category-team: var(--category-team);
-
-  border-color: var(--border);
-  outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: "Space Grotesk", sans-serif;
-  font-optical-sizing: auto;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    @apply cursor-pointer;
+  }
 }
 
-button:not([disabled]),
-[role="button"]:not([disabled]) {
-  cursor: pointer;
+@theme inline {
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
 }
 
 @keyframes spotlight {
@@ -155,6 +158,8 @@ button:not([disabled]),
   }
 }
 
-.animate-spotlight {
-  animation: spotlight 2s ease 0.75s 1 forwards;
+/* Global Space Grotesk Font */
+* {
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
 }
