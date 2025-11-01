@@ -14,7 +14,7 @@ export function Navigation({ currentView }: NavigationProps) {
       <div className="mx-auto max-w-7xl px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           <Link
-            href="/seeker/browse"
+            href="/seeker"
             className="cursor-pointer hover:opacity-80 transition-opacity"
           >
             <h1 className="text-2xl font-bold text-foreground">
@@ -31,7 +31,7 @@ export function Navigation({ currentView }: NavigationProps) {
               variant={currentView === "browse" ? "default" : "outline"}
               className="gap-2"
             >
-              <Link href="/seeker/browse">
+              <Link href="/seeker">
                 <Briefcase size={18} />
                 <span className="hidden sm:inline">Browse Jobs</span>
               </Link>

@@ -12,7 +12,7 @@ app.onError((err, c) => {
 
   // Handle Zod validation errors
   if (err instanceof ZodError) {
-    const errors = err.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+    const errors = err.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
     return c.json(
       {
         error: errors.length === 1 ? errors[0] : errors.join(", "),

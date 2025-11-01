@@ -23,10 +23,22 @@ export const useUnsaveJob = () => {
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SEEKER_JOBS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SEEKER_JOB] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SEEKER_SAVED_JOBS] });
+    onSuccess: (_, jobId) => {
+      // Invalidate all job queries to refetch with updated hasSaved state
+      queryClient.invalidateQueries({ 
+        queryKey: [QUERY_KEYS.SEEKER_JOBS],
+        refetchType: "active"
+      });
+      // Invalidate the specific job detail
+      queryClient.invalidateQueries({ 
+        queryKey: [QUERY_KEYS.SEEKER_JOB, jobId],
+        refetchType: "active"
+      });
+      // Invalidate saved jobs list
+      queryClient.invalidateQueries({ 
+        queryKey: [QUERY_KEYS.SEEKER_SAVED_JOBS],
+        refetchType: "active"
+      });
       toast.success("Job removed from saved!");
     },
     onError: (error: Error) => {

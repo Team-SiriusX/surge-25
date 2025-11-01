@@ -4,33 +4,35 @@ import { useState } from "react";
 import { ApplicationCard } from "./application-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { mockApplications } from "@/lib/mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ApplicationStatus } from "@/types/models";
 
 interface ApplicationsViewProps {
+  applications?: any[];
+  isLoading?: boolean;
   onViewDetails?: (jobId: string) => void;
 }
 
-export function ApplicationsView({ onViewDetails }: ApplicationsViewProps) {
+export function ApplicationsView({ applications = [], isLoading, onViewDetails }: ApplicationsViewProps) {
   const [selectedStatus, setSelectedStatus] =
     useState<ApplicationStatus | null>(null);
 
   const filteredApplications = selectedStatus
-    ? mockApplications.filter((app) => app.status === selectedStatus)
-    : mockApplications;
+    ? applications.filter((app) => app.status === selectedStatus)
+    : applications;
 
   const statusCounts = {
-    [ApplicationStatus.PENDING]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.PENDING
+    [ApplicationStatus.PENDING]: applications.filter(
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.PENDING
     ).length,
-    [ApplicationStatus.SHORTLISTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.SHORTLISTED
+    [ApplicationStatus.SHORTLISTED]: applications.filter(
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.SHORTLISTED
     ).length,
-    [ApplicationStatus.ACCEPTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.ACCEPTED
+    [ApplicationStatus.ACCEPTED]: applications.filter(
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.ACCEPTED
     ).length,
-    [ApplicationStatus.REJECTED]: mockApplications.filter(
-      (a) => a.status === ApplicationStatus.REJECTED
+    [ApplicationStatus.REJECTED]: applications.filter(
+      (a) => (a.status as ApplicationStatus) === ApplicationStatus.REJECTED
     ).length,
   };
 
@@ -54,7 +56,7 @@ export function ApplicationsView({ onViewDetails }: ApplicationsViewProps) {
         >
           All Applications
           <Badge variant="secondary" className="ml-auto">
-            {mockApplications.length}
+            {applications.length}
           </Badge>
         </Button>
         <Button
@@ -114,7 +116,13 @@ export function ApplicationsView({ onViewDetails }: ApplicationsViewProps) {
       </div>
 
       {/* Applications List */}
-      {filteredApplications.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+      ) : filteredApplications.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border py-12">
           <p className="text-lg font-semibold text-foreground">
             No applications yet

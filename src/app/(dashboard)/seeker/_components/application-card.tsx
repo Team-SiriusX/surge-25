@@ -1,23 +1,27 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ApplicationStatus } from "@/types/models"
-import { Calendar, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import type React from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ApplicationStatus } from "@/types/models";
+import { Calendar, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import Link from "next/link";
 
 interface ApplicationCardProps {
-  id: string
-  jobTitle: string
-  jobType: string
-  jobId: string
-  appliedAt: Date
-  status: ApplicationStatus
-  onViewDetails?: (jobId: string) => void
+  id: string;
+  jobTitle: string;
+  jobType: string;
+  jobId: string;
+  appliedAt: Date;
+  status: ApplicationStatus;
+  onViewDetails?: (jobId: string) => void;
 }
 
-const statusConfig: Record<ApplicationStatus, { color: string; icon: React.ReactNode; label: string }> = {
+const statusConfig: Record<
+  ApplicationStatus,
+  { color: string; icon: React.ReactNode; label: string }
+> = {
   [ApplicationStatus.PENDING]: {
     color: "bg-yellow-100 text-yellow-800",
     icon: <AlertCircle size={18} />,
@@ -38,7 +42,7 @@ const statusConfig: Record<ApplicationStatus, { color: string; icon: React.React
     icon: <XCircle size={18} />,
     label: "Rejected",
   },
-}
+};
 
 export function ApplicationCard({
   id,
@@ -49,7 +53,7 @@ export function ApplicationCard({
   status,
   onViewDetails,
 }: ApplicationCardProps) {
-  const config = statusConfig[status]
+  const config = statusConfig[status];
 
   return (
     <Card className="p-6">
@@ -65,7 +69,9 @@ export function ApplicationCard({
             </Badge>
           </div>
 
-          <h3 className="mt-3 text-lg font-semibold text-foreground">{jobTitle}</h3>
+          <h3 className="mt-3 text-lg font-semibold text-foreground">
+            {jobTitle}
+          </h3>
 
           <div className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
             <Calendar size={16} />
@@ -80,10 +86,16 @@ export function ApplicationCard({
           </div>
         </div>
 
-        <Button onClick={() => onViewDetails?.(jobId)} variant="outline" className="whitespace-nowrap">
+        <Link
+          href={`/seeker/jobs/${jobId}`}
+          className={buttonVariants({
+            variant: "outline",
+            className: "whitespace-nowrap",
+          })}
+        >
           View Details
-        </Button>
+        </Link>
       </div>
     </Card>
-  )
+  );
 }
