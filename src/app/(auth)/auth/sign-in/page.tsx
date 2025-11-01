@@ -130,7 +130,7 @@ export default function SignIn() {
                     await signIn.social(
                     {
                       provider: "google",
-                      callbackURL: "/dashboard"
+                      callbackURL: "/seeker"
                     },
                     {
                       onRequest: (ctx) => {
@@ -161,7 +161,7 @@ export default function SignIn() {
                     await signIn.social(
                     {
                       provider: "github",
-                      callbackURL: "/dashboard"
+                      callbackURL: "/seeker"
                     },
                     {
                       onRequest: (ctx) => {

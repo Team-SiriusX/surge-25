@@ -155,7 +155,7 @@ export default function SignUp() {
 								password,
 								name: `${firstName} ${lastName}`,
 								image: image ? await convertImageToBase64(image) : "",
-								callbackURL: "/dashboard",
+								callbackURL: "/seeker",
 								fetchOptions: {
 									onResponse: () => {
 										setLoading(false);
@@ -200,7 +200,7 @@ export default function SignUp() {
 								await signIn.social(
 									{
 										provider: "google",
-										callbackURL: "/dashboard",
+										callbackURL: "/seeker",
 									},
 									{
 										onRequest: () => {
@@ -236,7 +236,7 @@ export default function SignUp() {
 								await signIn.social(
 									{
 										provider: "github",
-										callbackURL: "/dashboard",
+										callbackURL: "/seeker",
 									},
 									{
 										onRequest: () => {
