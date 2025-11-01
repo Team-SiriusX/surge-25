@@ -1,7 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Custom theme colors from polynesian_blue, ucla_blue, and alice_blue */
+  --background: #fbfcfe;
+  --foreground: #064789;
+  --card: #ffffff;
+  --card-foreground: #064789;
+  --popover: #ffffff;
+  --popover-foreground: #064789;
+  --primary: #064789;
+  --primary-foreground: #ffffff;
+  --secondary: #427aa1;
+  --secondary-foreground: #ffffff;
+  --muted: #ebf2fa;
+  --muted-foreground: #427aa1;
+  --accent: #2b91f6;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #d7e5ef;
+  --input: #ebf2fa;
+  --ring: #064789;
+  --chart-1: #064789;
+  --chart-2: #427aa1;
+  --chart-3: #2b91f6;
+  --chart-4: #096cd0;
+  --chart-5: #72b6f9;
+  --radius: 0.625rem;
+  --sidebar: #064789;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #2b91f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #427aa1;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #05396e;
+  --sidebar-ring: #2b91f6;
+
+  /* Category colors */
+  --category-project: #0ea5e9;
+  --category-startup: #8b5cf6;
+  --category-job: #10b981;
+  --category-competition: #f59e0b;
+  --category-team: #ec4899;
+}
+
+.dark {
+  --background: #010e1b;
+  --foreground: #ffffff;
+  --card: #021d37;
+  --card-foreground: #ffffff;
+  --popover: #032b52;
+  --popover-foreground: #ffffff;
+  --primary: #2b91f6;
+  --primary-foreground: #010e1b;
+  --secondary: #88b1ce;
+  --secondary-foreground: #010e1b;
+  --muted: #05396e;
+  --muted-foreground: #88b1ce;
+  --accent: #72b6f9;
+  --accent-foreground: #010e1b;
+  --destructive: #ef4444;
+  --destructive-foreground: #010e1b;
+  --border: #05396e;
+  --input: #032b52;
+  --ring: #2b91f6;
+  --chart-1: #2b91f6;
+  --chart-2: #88b1ce;
+  --chart-3: #72b6f9;
+  --chart-4: #096cd0;
+  --chart-5: #b8dafc;
+  --sidebar: #021d37;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #72b6f9;
+  --sidebar-primary-foreground: #010e1b;
+  --sidebar-accent: #88b1ce;
+  --sidebar-accent-foreground: #010e1b;
+  --sidebar-border: #05396e;
+  --sidebar-ring: #72b6f9;
+}
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-category-project: var(--category-project);
+  --color-category-startup: var(--category-startup);
+  --color-category-job: var(--category-job);
+  --color-category-competition: var(--category-competition);
+  --color-category-team: var(--category-team);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not([disabled]),
+  [role="button"]:not([disabled]) {
+    @apply cursor-pointer;
+  }
+}
 
 @theme inline {
   --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
@@ -22,32 +162,4 @@
 * {
   font-family: "Space Grotesk", sans-serif;
   font-optical-sizing: auto;
-}
-
-body {
-  font-weight: 400;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-}
-
-.font-light {
-  font-weight: 300;
-}
-
-.font-normal {
-  font-weight: 400;
-}
-
-.font-medium {
-  font-weight: 500;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-bold {
-  font-weight: 700;
 }
