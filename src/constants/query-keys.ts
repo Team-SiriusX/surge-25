@@ -15,6 +15,8 @@ export const enum QUERY_KEYS {
   SEEKER_APPLICATIONS = "seeker-applications",
   SEEKER_APPLICATION = "seeker-application",
   PROFILE_CHAT = "profile-chat",
+  NOTIFICATIONS = "notifications",
+  NOTIFICATION_COUNT = "notification-count",
 }
 
 export const queryKeys = {
@@ -24,5 +26,9 @@ export const queryKeys = {
   },
   messages: {
     list: (conversationId: string) => [QUERY_KEYS.MESSAGES, conversationId],
+  },
+  notifications: {
+    list: () => [QUERY_KEYS.NOTIFICATIONS],
+    unreadCount: () => [QUERY_KEYS.NOTIFICATION_COUNT],
   },
 };
