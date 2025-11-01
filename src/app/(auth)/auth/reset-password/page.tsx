@@ -192,3 +192,17 @@ export default function ResetPasswordPage() {
 		</Suspense>
 	);
 }
+
+export default function ResetPasswordPage() {
+	return (
+		<Suspense fallback={
+			<Card className="z-50 rounded-md max-w-md">
+				<CardContent className="flex items-center justify-center p-8">
+					<Loader2 className="w-8 h-8 animate-spin" />
+				</CardContent>
+			</Card>
+		}>
+			<ResetPasswordForm />
+		</Suspense>
+	);
+}

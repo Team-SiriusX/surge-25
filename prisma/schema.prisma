@@ -22,7 +22,7 @@ model User {
   bio            String?
   skills         String[] // Array of skills
   interests      String[] // Array of interests
-  resume         String?  // URL to resume file
+  resume         String? // URL to resume file
   phone          String?
   linkedIn       String?
   github         String?
@@ -42,8 +42,8 @@ model User {
   savedJobs    SavedJob[]
 
   // Messaging relations
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages     Message[]                 @relation("SentMessages")
+  receivedMessages Message[]                 @relation("ReceivedMessages")
   conversations    ConversationParticipant[]
 
   // In-app Notifications
@@ -103,15 +103,15 @@ model JobPost {
   id          String      @id @default(cuid())
   title       String
   description String      @db.Text
-  type        JobType     // Enum for job types
+  type        JobType // Enum for job types
   category    JobCategory // enum for job categories
-  tags        String[]    // Array of tags for filtering
+  tags        String[] // Array of tags for filtering
 
   // Job Details
-  location     String?   // "Remote", "On-campus", specific location
-  duration     String?   // "1 month", "3 months", "Flexible"
-  compensation String?   // "Paid", "Unpaid", "$X/hr", "Equity"
-  requirements String[]  // Required skills/qualifications
+  location     String? // "Remote", "On-campus", specific location
+  duration     String? // "1 month", "3 months", "Flexible"
+  compensation String? // "Paid", "Unpaid", "$X/hr", "Equity"
+  requirements String[] // Required skills/qualifications
 
   // Status
   status   PostStatus @default(ACTIVE)
@@ -153,7 +153,7 @@ model Application {
 
   // Status
   status     ApplicationStatus @default(PENDING)
-  matchScore Int?              // 0-100 percentage match
+  matchScore Int? // 0-100 percentage match
 
   // Timestamps
   appliedAt DateTime @default(now())
@@ -245,10 +245,10 @@ model Notification {
   title     String
   message   String           @db.Text
   isRead    Boolean          @default(false)
-  link      String?          // URL to redirect when clicked
-  metadata  Json?            // Additional data (e.g., jobId, applicationId)
+  link      String? // URL to redirect when clicked
+  metadata  Json? // Additional data (e.g., jobId, applicationId)
   createdAt DateTime         @default(now())
-  readAt    DateTime?        // When the notification was read
+  readAt    DateTime? // When the notification was read
 
   // Relations
   userId String
@@ -308,13 +308,13 @@ enum ApplicationStatus {
 }
 
 enum NotificationType {
-  APPLICATION_RECEIVED    // When someone applies to your job
+  APPLICATION_RECEIVED // When someone applies to your job
   APPLICATION_STATUS_CHANGED // When your application status changes
-  NEW_MESSAGE            // When you receive a new chat message
-  JOB_EXPIRED            // When your job post expires
-  JOB_FILLED             // When your job is marked as filled
-  NEW_RECOMMENDATION     // When there's a new recommended job
-  SHORTLISTED            // When you're shortlisted for a job
-  ACCEPTED               // When your application is accepted
-  REJECTED               // When your application is rejected
+  NEW_MESSAGE // When you receive a new chat message
+  JOB_EXPIRED // When your job post expires
+  JOB_FILLED // When your job is marked as filled
+  NEW_RECOMMENDATION // When there's a new recommended job
+  SHORTLISTED // When you're shortlisted for a job
+  ACCEPTED // When your application is accepted
+  REJECTED // When your application is rejected
 }
