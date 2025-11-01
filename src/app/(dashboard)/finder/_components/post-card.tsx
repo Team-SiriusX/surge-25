@@ -29,7 +29,7 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/posts/${post.id}`)}>
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/finder/posts/${post.id}`)}>
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1">
@@ -51,18 +51,12 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
         <div className="flex items-center gap-4 py-2">
           <div className="flex items-center gap-1">
             <Eye className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{post.views}</span>
+            <span className="text-sm font-medium">{post.views || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{post.applicationsCount}</span>
+            <span className="text-sm font-medium">{post._count?.applications || 0}</span>
           </div>
-          {post.interestRate && (
-            <div className="text-sm">
-              <span className="font-medium">{(post.interestRate * 100).toFixed(1)}%</span>
-              <span className="text-muted-foreground text-xs ml-1">interest</span>
-            </div>
-          )}
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t">
@@ -74,7 +68,7 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
             className="bg-polynesian_blue hover:bg-polynesian_blue/90"
             onClick={(e) => {
               e.stopPropagation()
-              router.push(`/posts/${post.id}`)
+              router.push(`/finder/posts/${post.id}`)
             }}
           >
             View Post

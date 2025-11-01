@@ -5,59 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { mockPosts } from "@/lib/mock-data"
-import { ApplicantsList, type Applicant } from "../applicants-list"
-
-const mockApplicants: Applicant[] = [
-  {
-    id: "1",
-    name: "Sarah Chen",
-    email: "sarah.chen@email.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    role: "Senior Frontend Developer",
-    experience: 4,
-    status: "REVIEWING",
-    appliedAt: "2024-11-22",
-    matchScore: 92,
-  },
-  {
-    id: "2",
-    name: "James Wilson",
-    email: "james.w@email.com",
-    phone: "+1 (555) 234-5678",
-    location: "New York, NY",
-    role: "Full Stack Developer",
-    experience: 6,
-    status: "SHORTLISTED",
-    appliedAt: "2024-11-21",
-    matchScore: 88,
-  },
-  {
-    id: "3",
-    name: "Maya Patel",
-    email: "maya.patel@email.com",
-    phone: "+1 (555) 345-6789",
-    location: "Austin, TX",
-    role: "React Specialist",
-    experience: 3,
-    status: "REVIEWING",
-    appliedAt: "2024-11-20",
-    matchScore: 85,
-  },
-  {
-    id: "4",
-    name: "Alex Rodriguez",
-    email: "alex.r@email.com",
-    phone: "+1 (555) 456-7890",
-    location: "Remote",
-    role: "JavaScript Developer",
-    experience: 2,
-    status: "REJECTED",
-    appliedAt: "2024-11-19",
-    matchScore: 65,
-  },
-]
+import { ApplicantsList } from "../applicants-list"
+import { useGetJob, useGetApplications, useDeleteJob } from "../../_api"
+import { toast } from "sonner"
 
 interface PostDetailViewProps {
   postId: string
@@ -65,7 +15,33 @@ interface PostDetailViewProps {
 
 export function PostDetailView({ postId }: PostDetailViewProps) {
   const router = useRouter()
-  const post = mockPosts.find((p) => p.id === postId)
+  const { data: jobData, isLoading: jobLoading } = useGetJob(postId)
+  const { data: applicationsData, isLoading: applicationsLoading } = useGetApplications({ jobPostId: postId })
+  const { mutate: deleteJob, isPending: isDeleting } = useDeleteJob()
+
+  const post = jobData?.data
+  const applications = applicationsData?.data || []
+
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete this post?")) {
+      deleteJob(postId, {
+        onSuccess: () => {
+          router.push("/finder")
+        },
+      })
+    }
+  }
+
+  if (jobLoading) {
+    return (
+      <div className="p-8 space-y-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/4" />
+          <div className="h-64 bg-muted rounded" />
+        </div>
+      </div>
+    )
+  }
 
   if (!post) {
     return (
@@ -74,6 +50,20 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
       </div>
     )
   }
+
+  // Transform applications to match ApplicantsList interface
+  const applicants = applications.map((app) => ({
+    id: app.id,
+    name: app.applicant?.name || "Unknown",
+    email: app.applicant?.email || "",
+    phone: "N/A", // User model doesn't have phone
+    location: app.applicant?.university || "N/A", // Use university as location fallback
+    role: app.applicant?.major || "N/A", // Use major as role fallback
+    experience: 0, // User model doesn't have experience
+    status: app.status,
+    appliedAt: app.updatedAt ? new Date(app.updatedAt).toLocaleDateString() : "N/A",
+    matchScore: app.matchScore || 0,
+  }))
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -94,8 +84,6 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
       .replace(/([A-Z])/g, " $1")
       .trim()
   }
-
-  const applicants = mockApplicants.filter(() => Math.random() > 0.2)
 
   return (
     <div className="p-8 space-y-6">
@@ -125,15 +113,15 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-semibold">{post.location}</p>
+                  <p className="font-semibold">{post.location || "N/A"}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-semibold">{post.duration}</p>
+                  <p className="font-semibold">{post.duration || "N/A"}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Compensation</p>
-                  <p className="font-semibold">{post.compensation}</p>
+                  <p className="font-semibold">{post.compensation || "N/A"}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
@@ -144,22 +132,36 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
               </div>
 
               {/* Requirements */}
-              <div>
-                <h3 className="font-semibold mb-3">Requirements</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.requirements.map((req, idx) => (
-                    <Badge key={idx} variant="outline">
-                      {req}
-                    </Badge>
-                  ))}
+              {post.requirements && post.requirements.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3">Requirements</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {post.requirements.map((req, idx) => (
+                      <Badge key={idx} variant="outline">
+                        {req}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
           <div>
-            <h2 className="text-2xl font-bold mb-4">Applicants ({applicants.length})</h2>
-            <ApplicantsList postId={postId} applicants={applicants} />
+            <h2 className="text-2xl font-bold mb-4">
+              Applicants ({applicationsLoading ? "..." : applicants.length})
+            </h2>
+            {applicationsLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i} className="h-32 animate-pulse">
+                    <CardContent className="h-full bg-muted/50" />
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <ApplicantsList postId={postId} applicants={applicants} />
+            )}
           </div>
         </div>
 
@@ -175,21 +177,15 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
                   <Eye className="w-4 h-4 text-polynesian_blue" />
                   <span className="text-sm text-muted-foreground">Views</span>
                 </div>
-                <p className="text-2xl font-bold">{post.views}</p>
+                <p className="text-2xl font-bold">{post.views || 0}</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-polynesian_blue" />
                   <span className="text-sm text-muted-foreground">Applications</span>
                 </div>
-                <p className="text-2xl font-bold">{post.applicationsCount}</p>
+                <p className="text-2xl font-bold">{applicants.length}</p>
               </div>
-              {post.interestRate && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Interest Rate</span>
-                  <p className="text-2xl font-bold">{(post.interestRate * 100).toFixed(1)}%</p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -211,9 +207,11 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
                 variant="outline"
                 size="sm"
                 className="w-full justify-start gap-2 text-red-600 hover:text-red-700 bg-transparent"
+                onClick={handleDelete}
+                disabled={isDeleting}
               >
                 <Trash2 className="w-4 h-4" />
-                Delete
+                {isDeleting ? "Deleting..." : "Delete"}
               </Button>
             </CardContent>
           </Card>
