@@ -4,6 +4,7 @@ import * as z from "zod";
 import { db } from "@/lib/db";
 import { $Enums } from "@/generated/prisma";
 import { currentUser } from "@/lib/current-user";
+import { pusherServer } from "@/lib/pusher";
 
 const app = new Hono()
   // Get all applications for job posts created by current user with optional filters
@@ -327,6 +328,17 @@ const app = new Hono()
             },
           },
         });
+
+        // Trigger real-time notification via Pusher
+        await pusherServer.trigger(
+          `user-${existingApplication.applicant.id}`,
+          "new-notification",
+          {
+            type: status === "SHORTLISTED" ? "SHORTLISTED" : status === "ACCEPTED" ? "ACCEPTED" : status === "REJECTED" ? "REJECTED" : "APPLICATION_STATUS_CHANGED",
+            title: `Application ${status.toLowerCase()}`,
+            message: `Your application for "${existingApplication.jobPost.title}" has been ${status.toLowerCase()}.`,
+          }
+        );
 
         return c.json({
           data: updatedApplication,

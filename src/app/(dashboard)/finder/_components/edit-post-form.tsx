@@ -6,6 +6,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/ui/tag-input";
 import {
   Select,
   SelectContent,
@@ -38,8 +39,8 @@ const formSchema = z.object({
   location: z.string().optional(),
   duration: z.string().optional(),
   compensation: z.string().optional(),
-  requirements: z.string().optional(),
-  tags: z.string().optional(),
+  requirements: z.array(z.string()),
+  tags: z.array(z.string()),
   status: z.nativeEnum($Enums.PostStatus).optional(),
 });
 
@@ -90,28 +91,13 @@ export function EditPostForm({ post, onSubmit, isPending, onCancel }: EditPostFo
       location: post.location || "",
       duration: post.duration || "",
       compensation: post.compensation || "",
-      requirements: Array.isArray(post.requirements) ? post.requirements.join(", ") : "",
-      tags: Array.isArray(post.tags) ? post.tags.join(", ") : "",
+      requirements: Array.isArray(post.requirements) ? post.requirements : [],
+      tags: Array.isArray(post.tags) ? post.tags : [],
       status: post.status || "ACTIVE",
     },
   });
 
   const handleSubmit = (values: FormValues) => {
-    // Transform comma-separated strings to arrays
-    const requirements = values.requirements
-      ? values.requirements
-          .split(",")
-          .map((req) => req.trim())
-          .filter(Boolean)
-      : [];
-
-    const tags = values.tags
-      ? values.tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean)
-      : [];
-
     onSubmit({
       title: values.title,
       description: values.description,
@@ -120,8 +106,8 @@ export function EditPostForm({ post, onSubmit, isPending, onCancel }: EditPostFo
       location: values.location || undefined,
       duration: values.duration || undefined,
       compensation: values.compensation || undefined,
-      requirements,
-      tags,
+      requirements: values.requirements,
+      tags: values.tags,
       status: values.status,
     });
   };
@@ -270,48 +256,47 @@ export function EditPostForm({ post, onSubmit, isPending, onCancel }: EditPostFo
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="requirements"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Requirements</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="e.g., React, TypeScript, 3+ years experience"
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Separate requirements with commas
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="requirements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Requirements</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Press Enter or comma to add requirements"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Press Enter or comma to add each requirement
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., React, Frontend, Remote"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Separate tags with commas
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Press Enter or comma to add tags"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Press Enter or comma to add each tag
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />          <FormField
             control={form.control}
             name="status"
             render={({ field }) => (

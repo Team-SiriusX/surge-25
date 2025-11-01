@@ -48,20 +48,23 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/finder/posts")}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to My Posts
-        </Button>
-        <h1 className="text-3xl font-bold">Edit Post</h1>
-        <p className="text-muted-foreground mt-1">
-          Update your job or project post
-        </p>
+    <div className="container mx-auto max-w-4xl p-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push("/finder/posts")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Post</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Update your job or project post details
+            </p>
+          </div>
+        </div>
       </div>
 
       <EditPostForm

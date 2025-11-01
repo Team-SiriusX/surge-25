@@ -32,10 +32,10 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 mx-auto w-full max-w-7xl p-4 pt-20 md:pt-0">
           <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-center text-4xl font-bold text-transparent md:text-7xl">
-            Uni Connect <br /> is the new trend.
+            UniConnect <br /> is the new trend.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-center text-base font-normal text-neutral-300">
-           Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae sequi quibusdam molestias exercitationem debitis dolorum! Inventore quas, minus ea eveniet qui, fuga officiis beatae labore vel aperiam libero veritatis a atque, dolorem ad quis at!
+            Connect with opportunities, collaborate on projects, and build your career right from campus. Join thousands of students finding internships, startup roles, and academic collaborations through our AI-powered marketplace.
           </p>
         </div>
       </div>

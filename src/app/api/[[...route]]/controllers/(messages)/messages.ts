@@ -36,10 +36,35 @@ const conversationListInclude = {
 } as const;
 
 const conversationDetailInclude = {
-  ...conversationListInclude,
+  participants: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          email: true,
+        },
+      },
+    },
+  },
+  jobPost: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      poster: {
+        select: {
+          id: true,
+          name: true,
+          university: true,
+        },
+      },
+    },
+  },
   messages: {
     orderBy: {
-      createdAt: "asc",
+      createdAt: "asc" as const,
     },
     include: {
       sender: {
@@ -89,16 +114,31 @@ const getConversationApplication = async (
 ) => {
   if (!conversation.jobPostId) return null;
 
-  const otherParticipant = conversation.participants?.find(
-    (participant: any) => participant.userId !== currentUserId
-  );
+  // Find the applicant (not the job poster)
+  // The job poster owns the job post, so find the other participant
+  const jobPost = conversation.jobPost;
+  if (!jobPost) return null;
 
-  if (!otherParticipant) return null;
+  // If current user is the poster, get application for the other participant
+  // If current user is not the poster, get their own application
+  let applicantId: string;
+  
+  if (jobPost.poster?.id === currentUserId) {
+    // Current user is the poster, find the applicant
+    const applicantParticipant = conversation.participants?.find(
+      (participant: any) => participant.userId !== currentUserId
+    );
+    if (!applicantParticipant) return null;
+    applicantId = applicantParticipant.userId;
+  } else {
+    // Current user is the applicant
+    applicantId = currentUserId;
+  }
 
   return db.application.findFirst({
     where: {
       jobPostId: conversation.jobPostId,
-      applicantId: otherParticipant.userId,
+      applicantId: applicantId,
     },
     select: {
       id: true,
@@ -213,14 +253,7 @@ const app = new Hono()
       )
     );
 
-    // Filter to only show conversations with shortlisted applicants
-    const filteredConversations = conversations.filter((conversation) => {
-      if (!conversation.jobPostId) return true; // Non-job conversations are always visible
-      const status = conversation.application?.status;
-      return status === ApplicationStatus.SHORTLISTED; // Only show shortlisted
-    });
-
-    return c.json({ conversations: filteredConversations });
+    return c.json({ conversations });
   })
 
   // Get a specific conversation with all messages
@@ -251,18 +284,6 @@ const app = new Hono()
 
     if (!isParticipant) {
       return c.json({ error: "Not authorized to view this conversation" }, 403);
-    }
-
-    // Verify this is a shortlisted conversation if it's job-related
-    if (baseConversation.jobPostId) {
-      const application = await getConversationApplication(
-        baseConversation,
-        session.user.id
-      );
-
-      if (application?.status !== ApplicationStatus.SHORTLISTED) {
-        return c.json({ error: "Conversation not available" }, 403);
-      }
     }
 
     // Mark messages as read
@@ -326,30 +347,6 @@ const app = new Hono()
 
       if (receiverId === session.user.id) {
         return c.json({ error: "Cannot create a conversation with yourself" }, 400);
-      }
-
-      // Verify shortlisted status for job-related conversations
-      if (jobPostId) {
-        const shortlistedApplication = await db.application.findFirst({
-          where: {
-            jobPostId,
-            applicantId: receiverId,
-            status: ApplicationStatus.SHORTLISTED,
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        if (!shortlistedApplication) {
-          return c.json(
-            {
-              error:
-                "You can only start conversations with shortlisted applicants for this job.",
-            },
-            403
-          );
-        }
       }
 
       // Check if conversation already exists
@@ -418,114 +415,147 @@ const app = new Hono()
       })
     ),
     async (c) => {
-      const session = await auth.api.getSession({ headers: c.req.raw.headers });
+      try {
+        const session = await auth.api.getSession({
+          headers: c.req.raw.headers,
+        });
 
-      if (!session) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+        console.log("Send message - Session:", session?.user.id);
 
-      const conversationId = c.req.param("conversationId");
-      const { content } = c.req.valid("json");
+        if (!session) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
 
-      // Get conversation and verify user is a participant
-      const conversation = await db.conversation.findUnique({
-        where: { id: conversationId },
-        include: {
-          participants: true,
-        },
-      });
+        const conversationId = c.req.param("conversationId");
+        const { content } = c.req.valid("json");
 
-      if (!conversation) {
-        return c.json({ error: "Conversation not found" }, 404);
-      }
+        console.log("Send message - ConversationId:", conversationId);
+        console.log("Send message - Content length:", content.length);
 
-      const isParticipant = conversation.participants.some(
-        (p) => p.userId === session.user.id
-      );
+        // Get conversation and verify user is a participant
+        const conversation = await db.conversation.findUnique({
+          where: { id: conversationId },
+          include: {
+            participants: true,
+          },
+        });
 
-      if (!isParticipant) {
-        return c.json({ error: "Not authorized to send messages" }, 403);
-      }
-
-      // Verify shortlisted status for job-related conversations
-      if (conversation.jobPostId) {
-        const application = await getConversationApplication(
-          conversation,
-          session.user.id
+        console.log("Send message - Conversation found:", !!conversation);
+        console.log(
+          "Send message - Participants:",
+          conversation?.participants.map((p) => p.userId)
         );
 
-        if (application?.status !== ApplicationStatus.SHORTLISTED) {
-          return c.json(
-            {
-              error:
-                "You can only message shortlisted applicants for this job.",
-            },
-            403
-          );
+        if (!conversation) {
+          return c.json({ error: "Conversation not found" }, 404);
         }
-      }
 
-      // Get receiver ID (the other participant)
-      const receiverId = conversation.participants.find(
-        (p) => p.userId !== session.user.id
-      )?.userId;
+        const isParticipant = conversation.participants.some(
+          (p) => p.userId === session.user.id
+        );
 
-      if (!receiverId) {
-        return c.json({ error: "Receiver not found" }, 404);
-      }
+        console.log("Send message - Is participant:", isParticipant);
 
-      // Create message
-      const message = await db.message.create({
-        data: {
-          content,
-          conversationId,
-          senderId: session.user.id,
-          receiverId,
-        },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              email: true,
+        if (!isParticipant) {
+          return c.json({ error: "Not authorized to send messages" }, 403);
+        }
+
+        // Get receiver ID (the other participant)
+        const receiverId = conversation.participants.find(
+          (p) => p.userId !== session.user.id
+        )?.userId;
+
+        console.log("Send message - Receiver ID:", receiverId);
+
+        if (!receiverId) {
+          return c.json({ error: "Receiver not found" }, 404);
+        }
+
+        // Create message
+        console.log("Send message - Creating message...");
+        const message = await db.message.create({
+          data: {
+            content,
+            conversationId,
+            senderId: session.user.id,
+            receiverId,
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                email: true,
+              },
+            },
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                email: true,
+              },
             },
           },
-          receiver: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              email: true,
+        });
+
+        console.log("Send message - Message created:", message.id);
+
+        // Update conversation timestamp
+        await db.conversation.update({
+          where: { id: conversationId },
+          data: { updatedAt: new Date() },
+        });
+
+        // Create notification for receiver
+        await db.notification.create({
+          data: {
+            userId: receiverId,
+            type: "NEW_MESSAGE",
+            title: "New Message",
+            message: `${message.sender.name || "Someone"} sent you a message`,
+            link: `/finder/messages?conversation=${conversationId}`,
+            metadata: {
+              conversationId,
+              messageId: message.id,
+              senderId: session.user.id,
             },
           },
-        },
-      });
+        });
 
-      // Update conversation timestamp
-      await db.conversation.update({
-        where: { id: conversationId },
-        data: { updatedAt: new Date() },
-      });
+        console.log("Send message - Triggering Pusher events...");
 
-      // Trigger Pusher event for real-time delivery
-      await pusherServer.trigger(
-        `conversation-${conversationId}`,
-        "new-message",
-        message
-      );
+        // Trigger Pusher event for real-time delivery
+        await pusherServer.trigger(
+          `conversation-${conversationId}`,
+          "new-message",
+          message
+        );
 
-      // Trigger notification for receiver
-      await pusherServer.trigger(
-        `user-${receiverId}`,
-        "new-message-notification",
-        {
-          conversationId,
-          message,
-        }
-      );
+        // Trigger notification for receiver
+        await pusherServer.trigger(
+          `user-${receiverId}`,
+          "new-message-notification",
+          {
+            conversationId,
+            message,
+          }
+        );
 
-      return c.json({ message });
+        console.log("Send message - Success!");
+
+        return c.json({ message });
+      } catch (error) {
+        console.error("Send message - Error:", error);
+        return c.json(
+          {
+            error: "Internal server error",
+            details: error instanceof Error ? error.message : "Unknown error",
+          },
+          500
+        );
+      }
     }
   )
 

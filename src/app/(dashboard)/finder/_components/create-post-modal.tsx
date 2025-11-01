@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/ui/tag-input";
 import {
   Select,
   SelectContent,
@@ -39,8 +40,8 @@ const formSchema = z.object({
   location: z.string().optional(),
   duration: z.string().optional(),
   compensation: z.string().optional(),
-  requirements: z.string().optional(),
-  tags: z.string().optional(),
+  requirements: z.array(z.string()),
+  tags: z.array(z.string()),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -81,27 +82,12 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
       location: "",
       duration: "",
       compensation: "",
-      requirements: "",
-      tags: "",
+      requirements: [],
+      tags: [],
     },
   });
 
   const onSubmit = (values: FormValues) => {
-    // Transform comma-separated strings to arrays
-    const requirements = values.requirements
-      ? values.requirements
-          .split(",")
-          .map((req) => req.trim())
-          .filter(Boolean)
-      : [];
-
-    const tags = values.tags
-      ? values.tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean)
-      : [];
-
     createJob(
       {
         title: values.title,
@@ -111,8 +97,8 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
         location: values.location || undefined,
         duration: values.duration || undefined,
         compensation: values.compensation || undefined,
-        requirements,
-        tags,
+        requirements: values.requirements,
+        tags: values.tags,
         status: "ACTIVE",
         isDraft: false,
       },
@@ -127,75 +113,81 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-card border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Create New Post</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <Card className="w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
+          <div>
+            <h2 className="text-2xl font-bold">Create New Post</h2>
+            <p className="text-sm text-muted-foreground">Fill in the details to publish your opportunity</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-6 space-y-6"
-          >
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Post Type *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a job type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {JOB_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div className="flex-1 overflow-y-auto">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="p-6 space-y-6"
+            >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Post Type *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a job type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JOB_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {JOB_CATEGORIES.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JOB_CATEGORIES.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -229,7 +221,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               )}
             />
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="location"
@@ -283,14 +275,14 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                 <FormItem>
                   <FormLabel>Requirements</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="List requirements (comma-separated)"
-                      className="min-h-[80px] resize-none"
-                      {...field}
+                    <TagInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Press Enter or comma to add requirements"
                     />
                   </FormControl>
                   <FormDescription>
-                    Separate each requirement with a comma
+                    Press Enter or comma to add each requirement
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -304,13 +296,14 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., React, TypeScript, Remote"
-                      {...field}
+                    <TagInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Press Enter or comma to add tags"
                     />
                   </FormControl>
                   <FormDescription>
-                    Separate each tag with a comma
+                    Press Enter or comma to add each tag
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -330,8 +323,9 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                 {isPending ? "Creating..." : "Publish Post"}
               </Button>
             </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </Card>
     </div>
   );

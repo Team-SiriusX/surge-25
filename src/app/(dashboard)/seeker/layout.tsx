@@ -9,6 +9,7 @@ export default function SeekerLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isMessagesPage = pathname.includes("/messages");
 
   // Determine current view from pathname
   const getCurrentView = (): "browse" | "applications" | "saved" => {
@@ -18,9 +19,11 @@ export default function SeekerLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navigation currentView={getCurrentView()} />
-      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
+      <main className={isMessagesPage ? "flex-1 flex flex-col" : "mx-auto max-w-7xl px-4 py-8"}>
+        {children}
+      </main>
     </div>
   );
 }
