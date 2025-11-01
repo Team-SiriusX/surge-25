@@ -23,6 +23,7 @@ import {
 import { Eye, Users, TrendingUp, Zap } from "lucide-react";
 import { useGetDashboardStats } from "../../_api";
 import { useMemo } from "react";
+import { useSession } from "@/lib/auth-client";
 
 const CATEGORY_COLORS: Record<string, string> = {
   ACADEMIC_PROJECT: "#0ea5e9",
@@ -35,6 +36,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function DashboardView() {
   const { data, isLoading } = useGetDashboardStats();
+  const { data: session } = useSession();
 
   const dashboardData = data?.data;
 
@@ -116,7 +118,7 @@ export function DashboardView() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            Welcome back, John!
+            Welcome back, {session?.user?.name || "User"}!
           </h1>
           <p className="text-muted-foreground mt-2">
             Here&apos;s your recruitment overview
