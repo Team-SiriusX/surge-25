@@ -113,15 +113,15 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <Card className="w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
-          <div>
-            <h2 className="text-2xl font-bold">Create New Post</h2>
-            <p className="text-sm text-muted-foreground">Fill in the details to publish your opportunity</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4 backdrop-blur-sm">
+      <Card className="w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex-1 min-w-0 pr-2">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">Create New Post</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Fill in the details to publish your opportunity</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
-            <X className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+            <X className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
 
@@ -129,33 +129,33 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="p-6 space-y-6"
+              className="p-4 sm:p-6 space-y-4 sm:space-y-6"
             >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <FormField
                 control={form.control}
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Post Type *</FormLabel>
+                    <FormLabel className="text-sm">Post Type *</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="text-sm">
                           <SelectValue placeholder="Select a job type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {JOB_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value} value={type.value} className="text-sm">
                             {type.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
@@ -165,25 +165,25 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category *</FormLabel>
+                    <FormLabel className="text-sm">Category *</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="text-sm">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {JOB_CATEGORIES.map((category) => (
-                          <SelectItem key={category.value} value={category.value}>
+                          <SelectItem key={category.value} value={category.value} className="text-sm">
                             {category.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
@@ -194,11 +194,11 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title *</FormLabel>
+                  <FormLabel className="text-sm">Title *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter post title" {...field} />
+                    <Input placeholder="Enter post title" {...field} className="text-sm" />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -208,30 +208,30 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description *</FormLabel>
+                  <FormLabel className="text-sm">Description *</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe the opportunity in detail"
-                      className="min-h-[120px] resize-none"
+                      className="min-h-[100px] sm:min-h-[120px] resize-none text-sm"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <FormField
                 control={form.control}
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel className="text-sm">Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., New York, NY" {...field} />
+                      <Input placeholder="e.g., New York, NY" {...field} className="text-sm" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
@@ -241,11 +241,11 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                 name="duration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Duration</FormLabel>
+                    <FormLabel className="text-sm">Duration</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 3 months" {...field} />
+                      <Input placeholder="e.g., 3 months" {...field} className="text-sm" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
@@ -256,14 +256,15 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               name="compensation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Compensation</FormLabel>
+                  <FormLabel className="text-sm">Compensation</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="e.g., $500/month or Unpaid"
                       {...field}
+                      className="text-sm"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -273,7 +274,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               name="requirements"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Requirements</FormLabel>
+                  <FormLabel className="text-sm">Requirements</FormLabel>
                   <FormControl>
                     <TagInput
                       value={field.value}
@@ -281,10 +282,10 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                       placeholder="Press Enter or comma to add requirements"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs">
                     Press Enter or comma to add each requirement
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -294,7 +295,7 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags</FormLabel>
+                  <FormLabel className="text-sm">Tags</FormLabel>
                   <FormControl>
                     <TagInput
                       value={field.value}
@@ -302,24 +303,25 @@ export function CreatePostModal({ onClose, onSuccess }: CreatePostModalProps) {
                       placeholder="Press Enter or comma to add tags"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-xs">
                     Press Enter or comma to add each tag
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
 
-            <div className="flex gap-3 justify-end pt-4 border-t">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isPending}
+                className="w-full sm:w-auto text-sm"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm">
                 {isPending ? "Creating..." : "Publish Post"}
               </Button>
             </div>

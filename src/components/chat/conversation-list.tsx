@@ -102,19 +102,19 @@ export function ConversationList({
     !hasNoConversations && filteredConversations.length === 0;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full w-full flex-col">
       {/* Header with Search and Filters */}
-      <div className="border-b p-4">
-        <h1 className="mb-4 text-lg font-semibold">Messages</h1>
+      <div className="border-b p-3 sm:p-4">
+        <h1 className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold">Messages</h1>
 
         {/* Search Bar */}
-        <div className="relative mb-4">
+        <div className="relative mb-3 sm:mb-4">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-9"
+            className="pl-9 pr-9 text-sm h-9 sm:h-10"
           />
           {searchQuery && (
             <button
@@ -132,11 +132,11 @@ export function ConversationList({
             variant={filter === "all" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter("all")}
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm h-8 sm:h-9"
           >
             All
             {data && data.conversations.length > 0 && (
-              <Badge variant="secondary" className="ml-2 rounded-full px-2">
+              <Badge variant="secondary" className="ml-1 sm:ml-2 rounded-full px-1.5 sm:px-2 text-xs">
                 {data.conversations.length}
               </Badge>
             )}
@@ -145,11 +145,11 @@ export function ConversationList({
             variant={filter === "unread" ? "default" : "outline"}
             size="sm"
             onClick={() => setFilter("unread")}
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm h-8 sm:h-9"
           >
             Unread
             {unreadCount > 0 && (
-              <Badge variant="secondary" className="ml-2 rounded-full px-2">
+              <Badge variant="secondary" className="ml-1 sm:ml-2 rounded-full px-1.5 sm:px-2 text-xs">
                 {unreadCount}
               </Badge>
             )}
@@ -159,18 +159,18 @@ export function ConversationList({
 
       {/* Conversations List */}
       {hasNoConversations ? (
-        <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-          <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground" />
-          <h3 className="mb-2 font-semibold">No conversations yet</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center p-6 sm:p-8 text-center">
+          <MessageSquare className="mb-3 sm:mb-4 h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
+          <h3 className="mb-1 sm:mb-2 font-semibold text-sm sm:text-base">No conversations yet</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Start a conversation to see it here
           </p>
         </div>
       ) : hasNoResults ? (
-        <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-          <Search className="mb-4 h-12 w-12 text-muted-foreground" />
-          <h3 className="mb-2 font-semibold">No results found</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-col items-center justify-center p-6 sm:p-8 text-center">
+          <Search className="mb-3 sm:mb-4 h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
+          <h3 className="mb-1 sm:mb-2 font-semibold text-sm sm:text-base">No results found</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {searchQuery
               ? `No conversations match "${searchQuery}"`
               : "No unread conversations"}
@@ -180,7 +180,7 @@ export function ConversationList({
               variant="outline"
               size="sm"
               onClick={() => setSearchQuery("")}
-              className="mt-4"
+              className="mt-3 sm:mt-4 text-xs h-8"
             >
               Clear search
             </Button>
@@ -188,7 +188,7 @@ export function ConversationList({
         </div>
       ) : (
         <ScrollArea className="flex-1">
-          <div className="space-y-1 p-2">
+          <div className="space-y-1 px-2 py-1.5 pr-3 sm:px-3 sm:py-2 sm:pr-4">
             {filteredConversations.map((conversation) => {
               const otherParticipant = conversation.participants.find(
                 (p) => p.userId !== currentUserId
@@ -199,24 +199,24 @@ export function ConversationList({
                   key={conversation.id}
                   onClick={() => onSelectConversation(conversation.id)}
                   className={cn(
-                    "w-full rounded-lg p-3 text-left transition-colors hover:bg-accent",
+                    "w-full rounded-lg p-2 sm:p-3 text-left transition-colors hover:bg-accent",
                     selectedConversationId === conversation.id && "bg-accent"
                   )}
                 >
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 shrink-0">
                       <AvatarImage src={otherParticipant?.image || undefined} />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-sm">
                         {otherParticipant?.name?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 overflow-hidden">
-                      <div className="mb-1 flex items-center justify-between">
-                        <h4 className="font-semibold">
+                    <div className="flex-1 min-w-0 pr-2">
+                      <div className="mb-0.5 sm:mb-1 flex items-center justify-between gap-2">
+                        <h4 className="font-semibold text-sm sm:text-base truncate flex-1 pr-2">
                           {otherParticipant?.name}
                         </h4>
                         {conversation.lastMessage && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0 whitespace-nowrap pr-2">
                             {formatDistanceToNow(
                               new Date(conversation.lastMessage.createdAt),
                               { addSuffix: true }
@@ -225,18 +225,18 @@ export function ConversationList({
                         )}
                       </div>
                       {conversation.jobPost && (
-                        <p className="mb-1 truncate text-xs text-muted-foreground">
+                        <p className="mb-0.5 sm:mb-1 truncate text-[10px] sm:text-xs text-muted-foreground pr-2">
                           {conversation.jobPost.title} at{" "}
                           {conversation.jobPost.companyName}
                         </p>
                       )}
                       {conversation.lastMessage && (
-                        <p className="truncate text-sm text-muted-foreground">
+                        <p className="truncate text-xs sm:text-sm text-muted-foreground pr-2">
                           {conversation.lastMessage.content}
                         </p>
                       )}
                       {conversation.unreadCount > 0 && (
-                        <Badge variant="default" className="mt-2">
+                        <Badge variant="default" className="mt-1 sm:mt-2 text-[10px] sm:text-xs px-1.5 sm:px-2 h-5">
                           {conversation.unreadCount} new
                         </Badge>
                       )}

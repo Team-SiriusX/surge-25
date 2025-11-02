@@ -81,20 +81,20 @@ function TestimonialCard({
   avatar: string;
 }) {
   return (
-    <div className="group relative mx-4 w-[380px] rounded-xl border border-neutral-800 bg-neutral-950/50 p-6 backdrop-blur-sm transition-all duration-500 hover:border-blue-500/50">
-      <div className="mb-4 flex items-start gap-3">
+    <div className="group relative mx-2 w-[280px] rounded-xl border border-neutral-800 bg-neutral-950/50 p-4 backdrop-blur-sm transition-all duration-500 hover:border-blue-500/50 sm:mx-3 sm:w-[320px] sm:p-5 md:mx-4 md:w-[380px] md:p-6">
+      <div className="mb-3 flex items-start gap-2 sm:mb-4 sm:gap-3">
         <img
           src={avatar}
           alt={name}
-          className="h-10 w-10 rounded-full ring-1 ring-neutral-800 transition-all duration-300 group-hover:ring-blue-500/50"
+          className="h-8 w-8 rounded-full ring-1 ring-neutral-800 transition-all duration-300 group-hover:ring-blue-500/50 sm:h-9 sm:w-9 md:h-10 md:w-10"
         />
         <div className="flex-1">
-          <h4 className="text-sm font-medium text-white">{name}</h4>
-          <p className="text-xs text-neutral-500">{role}</p>
-          <p className="text-xs text-blue-500">{university}</p>
+          <h4 className="text-xs font-medium text-white sm:text-sm">{name}</h4>
+          <p className="text-[10px] text-neutral-500 sm:text-xs">{role}</p>
+          <p className="text-[10px] text-blue-500 sm:text-xs">{university}</p>
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-neutral-400">
+      <p className="text-xs leading-relaxed text-neutral-400 sm:text-sm">
         {quote}
       </p>
     </div>
@@ -108,20 +108,20 @@ export function TestimonialsSection() {
   const row3 = testimonials.slice(6, 8);
 
   return (
-    <section className="relative w-full overflow-hidden bg-black py-32">
+    <section className="relative w-full overflow-hidden bg-black py-16 sm:py-20 md:py-28 lg:py-32">
       
       {/* Minimal Header */}
-      <div className="relative z-10 mx-auto mb-20 max-w-3xl px-4 text-center">
-        <h2 className="mb-3 text-4xl font-bold text-white md:text-5xl">
+      <div className="relative z-10 mx-auto mb-12 max-w-3xl px-4 text-center sm:mb-16 md:mb-20">
+        <h2 className="mb-2 text-2xl font-bold text-white sm:text-3xl md:mb-3 md:text-4xl lg:text-5xl">
           Trusted by Students
         </h2>
-        <p className="text-base text-neutral-500">
+        <p className="text-sm text-neutral-500 sm:text-base">
           Join thousands building their future
         </p>
       </div>
 
       {/* Scrolling testimonials - Minimal spacing */}
-      <ThreeDScrollTriggerContainer className="space-y-4">
+      <ThreeDScrollTriggerContainer className="space-y-3 sm:space-y-4">
         {/* Row 1 - Moving right */}
         <ThreeDScrollTriggerRow baseVelocity={2.5} direction={1}>
           {row1.map((testimonial, idx) => (

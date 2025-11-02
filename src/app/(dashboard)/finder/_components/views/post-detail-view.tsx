@@ -34,10 +34,10 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
 
   if (jobLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/4" />
-          <div className="h-64 bg-muted rounded" />
+          <div className="h-6 sm:h-8 bg-muted rounded w-1/2 sm:w-1/4" />
+          <div className="h-48 sm:h-64 bg-muted rounded" />
         </div>
       </div>
     )
@@ -45,7 +45,7 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
 
   if (!post) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <p className="text-muted-foreground">Post not found</p>
       </div>
     )
@@ -86,46 +86,46 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header with back button */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex items-center gap-3 sm:gap-4">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8 sm:h-10 sm:w-10">
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <h1 className="text-3xl font-bold">Post Details</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Post Details</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Post Card */}
           <Card>
             <CardHeader>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <CardTitle className="text-2xl mb-2">{post.title}</CardTitle>
-                  <Badge>{formatType(post.type)}</Badge>
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl mb-2">{post.title}</CardTitle>
+                  <Badge className="text-xs sm:text-sm">{formatType(post.type)}</Badge>
                 </div>
-                <p className="text-muted-foreground">{post.description}</p>
+                <p className="text-sm sm:text-base text-muted-foreground">{post.description}</p>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-semibold">{post.location || "N/A"}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Location</p>
+                  <p className="font-semibold text-sm sm:text-base truncate">{post.location || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-semibold">{post.duration || "N/A"}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Duration</p>
+                  <p className="font-semibold text-sm sm:text-base truncate">{post.duration || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Compensation</p>
-                  <p className="font-semibold">{post.compensation || "N/A"}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Compensation</p>
+                  <p className="font-semibold text-sm sm:text-base truncate">{post.compensation || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <Badge className={`mt-1 ${getStatusColor(post.status)}`}>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Status</p>
+                  <Badge className={`mt-1 text-xs ${getStatusColor(post.status)}`}>
                     {post.status === "DRAFT" ? "Draft" : post.status === "ACTIVE" ? "Active" : "Closed"}
                   </Badge>
                 </div>
@@ -134,10 +134,10 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
               {/* Requirements */}
               {post.requirements && post.requirements.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-3">Requirements</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Requirements</h3>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {post.requirements.map((req, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <Badge key={idx} variant="outline" className="text-xs">
                         {req}
                       </Badge>
                     ))}
@@ -148,13 +148,13 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
           </Card>
 
           <div>
-            <h2 className="text-2xl font-bold mb-4">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4">
               Applicants ({applicationsLoading ? "..." : applicants.length})
             </h2>
             {applicationsLoading ? (
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="h-32 animate-pulse">
+                  <Card key={i} className="h-24 sm:h-32 animate-pulse">
                     <CardContent className="h-full bg-muted/50" />
                   </Card>
                 ))}
@@ -169,22 +169,22 @@ export function PostDetailView({ postId }: PostDetailViewProps) {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Post Statistics</CardTitle>
+              <CardTitle className="text-sm sm:text-base">Post Statistics</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-4 h-4 text-primary" />
-                  <span className="text-sm text-muted-foreground">Views</span>
+                <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Views</span>
                 </div>
-                <p className="text-2xl font-bold">{post.views || 0}</p>
+                <p className="text-xl sm:text-2xl font-bold">{post.views || 0}</p>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span className="text-sm text-muted-foreground">Applications</span>
+                <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Applications</span>
                 </div>
-                <p className="text-2xl font-bold">{applicants.length}</p>
+                <p className="text-xl sm:text-2xl font-bold">{applicants.length}</p>
               </div>
             </CardContent>
           </Card>

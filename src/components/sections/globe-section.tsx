@@ -227,12 +227,12 @@ export function GlobeSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden bg-black py-20 md:py-32">
+    <section ref={sectionRef} className="relative w-full overflow-hidden bg-black py-12 sm:py-16 md:py-24 lg:py-32">
       {/* Grid Background */}
-      <div className="pointer-events-none absolute inset-0 select-none [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] [background-size:40px_40px]" />
+      <div className="pointer-events-none absolute inset-0 select-none [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] [background-size:20px_20px] sm:[background-size:30px_30px] md:[background-size:40px_40px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="grid items-center gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
           {/* Content Side */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -241,20 +241,20 @@ export function GlobeSection() {
             viewport={{ once: true }}
             className="order-2 lg:order-1"
           >
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
                   Connect with Students{" "}
                   <span className="relative inline-block">
                     <span className="relative z-10 text-white mix-blend-lighten">Worldwide</span>
                     <span 
                       ref={highlight1Ref}
-                      className="absolute bottom-1 left-0 z-0 h-4 w-full bg-blue-500/80 sm:bottom-2 sm:h-5"
+                      className="absolute bottom-0.5 left-0 z-0 h-2.5 w-full bg-blue-500/80 sm:bottom-1 sm:h-3 md:bottom-1.5 md:h-4 lg:h-5"
                       style={{ 
                         boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
                         transformOrigin: "left center",
@@ -269,7 +269,7 @@ export function GlobeSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="max-w-xl text-lg leading-relaxed text-neutral-400 sm:text-xl"
+                className="max-w-xl text-sm leading-relaxed text-neutral-400 sm:text-base md:text-lg lg:text-xl"
               >
                 Join a{" "}
                 <span className="relative inline-block">
@@ -297,7 +297,7 @@ export function GlobeSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
-                className="flex flex-col gap-3 pt-2 text-base text-neutral-400 sm:text-lg"
+                className="flex flex-col gap-2 pt-2 text-sm text-neutral-400 sm:gap-3 sm:text-base md:text-lg"
               >
                 <div className="flex items-center gap-3">
                   <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
@@ -355,7 +355,7 @@ export function GlobeSection() {
             viewport={{ once: true }}
             className="order-1 lg:order-2"
           >
-            <div className="relative mx-auto h-[400px] w-full md:h-[500px] lg:h-[600px]">
+            <div className="relative mx-auto h-[300px] w-full sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[600px]">
               <div className="absolute inset-0 z-0">
                 <World data={sampleArcs} globeConfig={globeConfig} />
               </div>

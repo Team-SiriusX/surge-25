@@ -7,14 +7,28 @@ import { ConversationList as RealConversationList } from "@/components/chat/conv
 import { useSession } from "@/lib/auth-client"
 import { usePusherNotifications } from "@/hooks/use-pusher-notifications"
 import { MessageSquare } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function Page() {
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   
   // Subscribe to global message notifications
   usePusherNotifications(session?.user?.id || null)
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Handle conversationId from URL query params
   useEffect(() => {
@@ -23,6 +37,10 @@ export default function Page() {
       setSelectedConversationId(conversationIdFromUrl)
     }
   }, [searchParams])
+
+  const handleBackToList = () => {
+    setSelectedConversationId(null)
+  }
 
   if (!session?.user) {
     return (
@@ -34,8 +52,11 @@ export default function Page() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Left Sidebar - Conversations */}
-      <div className="w-80 border-r">
+      {/* Left Sidebar - Conversations (hide on mobile when chat selected) */}
+      <div className={cn(
+        "w-full md:w-80 border-r flex",
+        isMobile && selectedConversationId && "hidden"
+      )}>
         <RealConversationList
           currentUserId={session.user.id}
           selectedConversationId={selectedConversationId}
@@ -43,18 +64,22 @@ export default function Page() {
         />
       </div>
 
-      {/* Center - Chat Thread */}
-      <div className="flex-1">
+      {/* Center - Chat Thread (show on desktop always, on mobile only when chat selected) */}
+      <div className={cn(
+        "flex-1 flex",
+        isMobile && !selectedConversationId && "hidden"
+      )}>
         {selectedConversationId ? (
           <ChatInterface
             conversationId={selectedConversationId}
             currentUserId={session.user.id}
+            onBack={isMobile ? handleBackToList : undefined}
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center">
+          <div className="flex h-full w-full flex-col items-center justify-center px-4">
             <MessageSquare className="mb-4 h-16 w-16 text-muted-foreground/50" />
-            <h3 className="mb-2 text-xl font-semibold">Select a conversation</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="mb-2 text-xl font-semibold text-center">Select a conversation</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-md">
               Choose a conversation from the list to start chatting
             </p>
           </div>

@@ -52,13 +52,19 @@ const CarouselItemCard: React.FC<CarouselItemProps> = ({ feature, side }) => {
     const distance = Math.abs(distanceFromCenter);
     const opacity = 1 - distance / 4;
     const scale = 1 - distance * 0.1;
-    const yOffset = distanceFromCenter * 90;
-    const xOffset = side === 'left' ? -distance * 50 : distance * 50;
+
+    // Tighter offsets on small screens to avoid clipping
+    const isClient = typeof window !== 'undefined';
+    const vw = isClient ? window.innerWidth : 1024;
+    const xFactor = vw < 640 ? 28 : vw < 1024 ? 40 : 50;
+    const yFactor = vw < 640 ? 70 : 90;
+    const yOffset = distanceFromCenter * yFactor;
+    const xOffset = (side === 'left' ? -1 : 1) * distance * xFactor;
 
     return (
         <motion.div
             key={id}
-            className={`absolute flex items-center gap-4 px-6 py-3 
+            className={`absolute flex max-w-[86vw] items-center gap-3 px-4 py-2 sm:max-w-none sm:gap-4 sm:px-6 sm:py-3 
                 ${side === 'left' ? 'flex-row-reverse' : 'flex-row'}`}
             animate={{
                 opacity,
@@ -88,9 +94,9 @@ const CarouselItemCard: React.FC<CarouselItemProps> = ({ feature, side }) => {
                 <Icon className="size-8 text-blue-400" />
             </motion.div>
 
-            <div className={`flex flex-col mx-4 ${side === 'left' ? 'text-right' : 'text-left'}`}>
-                <span className="text-md lg:text-lg font-semibold text-white whitespace-nowrap">{name}</span>
-                <span className="text-xs lg:text-sm text-neutral-400">{details}</span>
+            <div className={`mx-3 flex max-w-[70vw] flex-col sm:mx-4 sm:max-w-xs ${side === 'left' ? 'text-right' : 'text-left'}`}>
+                <span className="truncate text-sm font-semibold text-white sm:text-base lg:text-lg">{name}</span>
+                <span className="text-[11px] leading-snug text-neutral-400 sm:text-xs lg:text-sm">{details}</span>
             </div>
         </motion.div>
     );
@@ -186,12 +192,12 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
     const currentItem = items[currentIndex];
 
     return (
-        <div className={`space-y-20 ${className}`}>
-            <div className='flex flex-col xl:flex-row max-w-7xl mx-auto px-4 md:px-8 gap-12 justify-center items-center'>
+        <div className={`space-y-12 sm:space-y-16 md:space-y-20 ${className}`}>
+            <div className='flex flex-col xl:flex-row max-w-7xl mx-auto px-4 sm:px-6 md:px-8 gap-8 sm:gap-10 md:gap-12 justify-center items-center'>
                 
                 {/* Left Section - Feature Carousel (Hidden on mobile) */}
                 <motion.div
-                    className="relative w-full max-w-md xl:max-w-2xl h-[450px] flex items-center justify-center hidden xl:flex -left-14"
+                    className="relative w-full max-w-md xl:max-w-2xl h-[450px] flex items-center justify-center hidden xl:flex xl:-left-14"
                     onMouseEnter={() => !searchTerm && setIsPaused(true)}
                     onMouseLeave={() => !searchTerm && setIsPaused(false)}
                     initial={{ x: '-100%', opacity: 0 }}
@@ -213,11 +219,11 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                 </motion.div>
 
                 {/* Middle Section - Current Feature Display */}
-                <div className="flex flex-col text-center gap-4 max-w-md">
+                <div className="flex flex-col text-center gap-3 w-full max-w-md sm:gap-4">
                     {currentItem && (
-                        <div className="flex flex-col items-center justify-center gap-0 mt-4">
+                        <div className="flex flex-col items-center justify-center gap-0 mt-2 sm:mt-4">
                             <motion.div 
-                                className='p-3 bg-blue-500/20 border border-blue-500/40 rounded-full backdrop-blur-sm'
+                                className='p-2.5 bg-blue-500/20 border border-blue-500/40 rounded-full backdrop-blur-sm sm:p-3'
                                 animate={{
                                     y: [0, -10, 0],
                                     borderColor: ["rgba(59, 130, 246, 0.4)", "rgba(59, 130, 246, 0.8)", "rgba(59, 130, 246, 0.4)"],
@@ -233,10 +239,10 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                                     ease: "easeInOut"
                                 }}
                             >
-                                <currentItem.icon className="size-12 text-blue-400" />
+                                <currentItem.icon className="size-10 text-blue-400 sm:size-12" />
                             </motion.div>
                             <motion.h3 
-                                className="text-xl xl:text-2xl font-bold text-white mt-4"
+                                className="text-lg font-bold text-white mt-3 sm:text-xl sm:mt-4 xl:text-2xl"
                                 key={currentItem.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -245,7 +251,7 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                                 {currentItem.name}
                             </motion.h3>
                             <motion.p 
-                                className="text-sm xl:text-base text-neutral-400 mt-2 max-w-sm"
+                                className="text-xs text-neutral-400 mt-2 max-w-sm px-2 leading-relaxed sm:text-sm sm:px-0 xl:text-base"
                                 key={`${currentItem.id}-desc`}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -257,8 +263,8 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                     )}
 
                     {/* Search Bar */}
-                    <div className="mt-6 relative max-w-lg mx-auto xl:mx-0">
-                        <div className="px-3 flex items-center relative">
+                    <div className="mt-4 relative w-full mx-auto sm:mt-6 xl:mx-0">
+                        <div className="px-2 flex items-center relative sm:px-3">
                             <input
                                 type="text"
                                 value={searchTerm}
@@ -276,9 +282,9 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                                 onBlur={() => {
                                     setTimeout(() => setShowDropdown(false), 200);
                                 }}
-                                className="flex-grow outline-none text-white bg-white/5 px-4 placeholder-neutral-500 text-lg rounded-full border-neutral-700 pr-10 pl-10 py-3 cursor-pointer border backdrop-blur-sm focus:border-blue-500/50 transition-colors"
+                                className="flex-grow outline-none text-white bg-white/5 px-4 placeholder-neutral-500 text-sm rounded-full border-neutral-700 pr-10 pl-9 py-2.5 cursor-pointer border backdrop-blur-sm focus:border-blue-500/50 transition-colors sm:text-base sm:py-3 sm:pl-10"
                             />
-                            <Search className="absolute text-neutral-400 w-5 h-5 left-6 pointer-events-none" />
+                            <Search className="absolute text-neutral-400 w-4 h-4 left-5 pointer-events-none sm:w-5 sm:h-5 sm:left-6" />
                             {searchTerm && (
                                 <button
                                     onClick={() => {
@@ -286,16 +292,16 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                                         setShowDropdown(false);
                                         setIsPaused(false);
                                     }}
-                                    className="absolute right-6 text-neutral-400 hover:text-white transition-colors"
+                                    className="absolute right-5 text-neutral-400 hover:text-white transition-colors sm:right-6"
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             )}
                         </div>
 
                         {/* Dropdown for search results */}
                         {showDropdown && filteredItems.length > 0 && (
-                            <div className="absolute left-0 right-0 mt-2 bg-neutral-900/95 backdrop-blur-lg rounded-lg border border-neutral-800 z-20 max-h-60 overflow-y-auto shadow-xl">
+                            <div className="absolute left-2 right-2 mt-2 bg-neutral-900/95 backdrop-blur-lg rounded-lg border border-neutral-800 z-20 max-h-60 overflow-y-auto shadow-xl sm:left-3 sm:right-3">
                                 {filteredItems.slice(0, 10).map((feature) => (
                                     <div
                                         key={feature.id}
@@ -303,11 +309,13 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                                             e.preventDefault();
                                             handleSelectFeature(feature.id, feature.name);
                                         }}
-                                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-500/10 transition-colors duration-150 rounded-lg m-2"
+                                        className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-blue-500/10 transition-colors duration-150 rounded-lg m-1.5 sm:gap-3 sm:px-4 sm:py-3 sm:m-2"
                                     >
-                                        <feature.icon size={20} className="text-blue-400" />
-                                        <span className="text-white font-medium">{feature.name}</span>
-                                        <span className="ml-auto text-sm text-neutral-500">{feature.details}</span>
+                                        <feature.icon size={18} className="text-blue-400 flex-shrink-0 sm:size-5" />
+                                        <div className="flex flex-col flex-1 min-w-0">
+                                            <span className="text-sm text-white font-medium truncate sm:text-base">{feature.name}</span>
+                                            <span className="text-xs text-neutral-500 truncate sm:text-sm">{feature.details}</span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -318,7 +326,7 @@ const FeatureCarousel: React.FC<FeatureCarouselProps> = ({
                 {/* Right Section - Feature Carousel */}
                 <motion.div
                     ref={rightSectionRef}
-                    className="relative w-full max-w-md xl:max-w-2xl h-[450px] flex items-center justify-center -right-14"
+                    className="relative w-full max-w-md xl:max-w-2xl h-[450px] flex items-center justify-center xl:-right-14"
                     onMouseEnter={() => !searchTerm && setIsPaused(true)}
                     onMouseLeave={() => !searchTerm && setIsPaused(false)}
                     initial={{ x: '100%', opacity: 0 }}

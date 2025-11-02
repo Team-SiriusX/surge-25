@@ -11,7 +11,7 @@ export const Spotlight = ({ className, fill = "white", mirror = false }: Spotlig
   return (
     <svg
       className={cn(
-        "pointer-events-none absolute z-[1] h-[169%] w-[138%] animate-spotlight opacity-0 lg:w-[84%]",
+        "pointer-events-none absolute z-[1] h-[120%] w-[200%] animate-spotlight opacity-0 sm:h-[140%] sm:w-[160%] md:h-[169%] md:w-[138%] lg:w-[84%]",
         mirror && "scale-x-[-1]",
         className
       )}

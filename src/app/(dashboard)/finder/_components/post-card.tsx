@@ -73,17 +73,17 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
   return (
     <>
       <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex justify-between items-start gap-3">
-            <div className="flex-1 cursor-pointer" onClick={() => router.push(`/finder/posts/${post.id}`)}>
-              <CardTitle className="line-clamp-2">{post.title}</CardTitle>
-              <Badge className={`mt-2 ${categoryColor}`}>{formatType(post.type)}</Badge>
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex justify-between items-start gap-2 sm:gap-3">
+            <div className="flex-1 cursor-pointer min-w-0" onClick={() => router.push(`/finder/posts/${post.id}`)}>
+              <CardTitle className="line-clamp-2 text-base sm:text-lg">{post.title}</CardTitle>
+              <Badge className={`mt-2 text-[10px] sm:text-xs ${categoryColor}`}>{formatType(post.type)}</Badge>
             </div>
             
             {/* Actions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0">
+                <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 sm:h-9 sm:w-9">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -121,36 +121,37 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           <div className="cursor-pointer" onClick={() => router.push(`/finder/posts/${post.id}`)}>
-            <p className="text-sm text-muted-foreground line-clamp-2">{post.description}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{post.description}</p>
 
             {post.location && (
-              <div className="text-sm mt-3">
+              <div className="text-xs sm:text-sm mt-2 sm:mt-3">
                 <span className="font-semibold">Location:</span>
                 <span className="ml-2 text-muted-foreground">{post.location}</span>
               </div>
             )}
 
-            <div className="flex items-center gap-4 py-2 mt-3">
+            <div className="flex items-center gap-3 sm:gap-4 py-2 mt-2 sm:mt-3">
               <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{post.views || 0}</span>
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm font-medium">{post.views || 0}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{post._count?.applications || 0}</span>
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+                <span className="text-xs sm:text-sm font-medium">{post._count?.applications || 0}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 sm:pt-4 border-t">
             <Badge className={getStatusColor(post.status)}>
               {post.status === "DRAFT" ? "Draft" : post.status === "ACTIVE" ? "Active" : post.status === "CLOSED" ? "Filled" : "Closed"}
             </Badge>
             <Button
               size="sm"
               variant="outline"
+              className="w-full sm:w-auto text-xs sm:text-sm"
               onClick={(e) => {
                 e.stopPropagation()
                 router.push(`/finder/posts/${post.id}`)
@@ -164,19 +165,19 @@ export function PostCard({ post, categoryColor, formatType }: PostCardProps) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               This action cannot be undone. This will permanently delete your job post
               and all associated applications.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete"}

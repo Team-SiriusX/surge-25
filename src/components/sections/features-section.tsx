@@ -184,29 +184,29 @@ export function FeaturesSection() {
     ];
 
     return (
-        <section ref={sectionRef} className="relative w-full overflow-hidden bg-black py-20 md:py-32">
+        <section ref={sectionRef} className="relative w-full overflow-hidden bg-black py-12 sm:py-16 md:py-24 lg:py-32">
             {/* Grid Background */}
-            <div className="pointer-events-none absolute inset-0 select-none [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] [background-size:40px_40px]" />
+            <div className="pointer-events-none absolute inset-0 select-none [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] [background-size:20px_20px] sm:[background-size:30px_30px] md:[background-size:40px_40px]" />
 
             {/* Content */}
             <div className="relative z-10">
                 {/* Section Header */}
                 <div
                     ref={headerRef}
-                    className="mx-auto max-w-3xl px-4 text-center mb-16"
+                    className="mx-auto mb-10 max-w-3xl px-4 text-center sm:mb-12 md:mb-16"
                 >
-                    <h2 className="text-3xl font-bold text-white sm:text-4xl md:text-5xl lg:text-6xl">
+                    <h2 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
                         Explore{" "}
                         <span className="relative inline-block">
                             <span className="relative z-10 text-white">Features</span>
                             <span 
                                 ref={highlightRef}
-                                className="absolute bottom-2 left-0 z-0 h-3 w-full bg-blue-500/60"
+                                className="absolute bottom-1 left-0 z-0 h-2 w-full bg-blue-500/60 sm:h-2.5 md:bottom-2 md:h-3"
                                 style={{ transformOrigin: "left center" }}
                             />
                         </span>
                     </h2>
-                    <p className="mt-4 text-lg text-neutral-400 sm:text-xl">
+                    <p className="mt-3 text-sm leading-relaxed text-neutral-400 sm:mt-4 sm:text-base md:text-lg lg:text-xl">
                         Discover the powerful tools that make CampusConnect the ultimate
                         platform for university talent discovery and collaboration.
                     </p>
@@ -217,16 +217,16 @@ export function FeaturesSection() {
                     <FeatureCarousel
                         items={features}
                         scrollSpeedMs={2000}
-                        visibleItemCount={9}
+                        visibleItemCount={7}
                     />
                 </div>
 
                 {/* Call to Action */}
                 <div
                     ref={ctaRef}
-                    className="mx-auto mt-16 max-w-2xl px-4 text-center"
+                    className="mx-auto mt-10 max-w-2xl px-4 text-center sm:mt-12 md:mt-16"
                 >
-                    <p className="text-base text-neutral-400 sm:text-lg">
+                    <p className="text-sm leading-relaxed text-neutral-400 sm:text-base md:text-lg">
                         Whether you&apos;re looking to{" "}
                         <span className="font-semibold text-white">hire talent</span> or{" "}
                         <span className="font-semibold text-white">find opportunities</span>,

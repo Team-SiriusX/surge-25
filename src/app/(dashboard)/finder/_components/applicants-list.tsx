@@ -49,45 +49,45 @@ export function ApplicantsList({ postId, applicants }: ApplicantsListProps) {
           className="hover:shadow-md transition-shadow cursor-pointer"
           onClick={() => router.push(`/finder/posts/${postId}/applicants/${applicant.id}`)}
         >
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="font-semibold text-primary">{applicant.name.charAt(0)}</span>
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 sm:gap-4">
+              <div className="flex-1 w-full">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                    <span className="font-semibold text-primary text-sm sm:text-base">{applicant.name.charAt(0)}</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{applicant.name}</h3>
-                    <p className="text-sm text-muted-foreground">{applicant.role}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base sm:text-lg truncate">{applicant.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{applicant.role}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 ml-16">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4 sm:ml-16">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm min-w-0">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground truncate">{applicant.email}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">{applicant.phone}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground truncate">{applicant.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">{applicant.location}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground truncate">{applicant.location}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <Briefcase className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground">{applicant.experience} yrs</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right">
+              <div className="flex flex-row sm:flex-col items-center gap-3 w-full sm:w-auto justify-between sm:justify-start sm:text-right">
+                <div>
                   <div className="text-sm font-semibold text-primary">{applicant.matchScore}%</div>
                   <p className="text-xs text-muted-foreground">Match</p>
                 </div>
-                <Badge className={getStatusColor(applicant.status)}>
+                <Badge className={`${getStatusColor(applicant.status)} text-xs`}>
                   {applicant.status === "SHORTLISTED"
                     ? "Shortlisted"
                     : applicant.status === "PENDING"

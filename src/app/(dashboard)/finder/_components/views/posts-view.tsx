@@ -38,28 +38,30 @@ export function PostsView({ onCreatePost }: { onCreatePost: () => void }) {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">My Posts</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Posts</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage your job and project posts
           </p>
         </div>
-        <Button onClick={onCreatePost} size="lg" className="gap-2">
+        <Button onClick={onCreatePost} size="default" className="gap-2 w-full sm:w-auto">
           <Zap className="w-4 h-4" />
           Create Post
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {(["all", "ACTIVE", "DRAFT", "CLOSED"] as const).map((filter) => (
           <Button
             key={filter}
             variant={activeFilter === filter ? "default" : "outline"}
             onClick={() => setActiveFilter(filter)}
+            size="sm"
+            className="flex-1 sm:flex-none min-w-[70px]"
           >
             {filter.charAt(0).toUpperCase() + filter.slice(1).toLowerCase()}
           </Button>
@@ -68,15 +70,15 @@ export function PostsView({ onCreatePost }: { onCreatePost: () => void }) {
 
       {/* Posts Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="h-64 animate-pulse">
+            <Card key={i} className="h-56 sm:h-64 animate-pulse">
               <CardContent className="h-full bg-muted/50" />
             </Card>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {posts.map((post) => (
             <PostCard
               key={post.id}
@@ -92,8 +94,8 @@ export function PostsView({ onCreatePost }: { onCreatePost: () => void }) {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">No posts found</h3>
-              <p className="text-muted-foreground mb-4">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">No posts found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
                 Start by creating your first post
               </p>
               <Button onClick={onCreatePost}>Create Post</Button>
